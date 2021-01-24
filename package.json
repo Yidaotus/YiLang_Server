@@ -1,0 +1,63 @@
+{
+	"name": "yitext-server",
+	"version": "0.0.0",
+	"engines": {
+		"node": ">=11.13.0"
+	},
+	"private": true,
+	"author": "Daniel Voigt <D.Voigt1993@gmail.com>",
+	"license": "UNLICENSED",
+	"scripts": {
+		"start:dev": "ts-node ./src/app.ts",
+		"start:prod": "node ./build/app.js",
+		"lint": "eslint --ext .js, src",
+		"lint:fix": "eslint --ext .js src --fix",
+		"build": "rimraf ./build && tsc"
+	},
+	"dependencies": {
+		"bcrypt": "^5.0.0",
+		"config": "^3.3.1",
+		"cookie-parser": "^1.4.5",
+		"cors": "^2.8.5",
+		"debug": "~2.6.9",
+		"express": "~4.16.1",
+		"express-joi-validation": "^4.0.4-beta.0",
+		"joi": "^17.1.1",
+		"jsonwebtoken": "^8.5.1",
+		"mongoose": "^5.9.27",
+		"node-pre-gyp": "^0.15.0",
+		"nodemailer": "^6.4.11"
+	},
+	"devDependencies": {
+		"@types/bcrypt": "^3.0.0",
+		"@types/config": "0.0.36",
+		"@types/cookie-parser": "^1.4.2",
+		"@types/cors": "^2.8.7",
+		"@types/express": "^4.17.7",
+		"@types/hapi__joi": "^17.1.4",
+		"@types/jsonwebtoken": "^8.5.0",
+		"@types/mongoose": "^5.7.35",
+		"@types/node": "^14.0.27",
+		"@types/nodemailer": "^6.4.0",
+		"@typescript-eslint/eslint-plugin": "^3.8.0",
+		"@typescript-eslint/parser": "^3.8.0",
+		"eslint": "^6.8.0",
+		"eslint-config-airbnb-base": "^14.2.0",
+		"eslint-config-airbnb-typescript": "^8.0.2",
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-import-resolver-typescript": "^2.2.0",
+		"eslint-plugin-import": "^2.22.0",
+		"eslint-plugin-jsx-a11y": "^6.3.1",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-prettier": "^3.1.4",
+		"eslint-plugin-react": "^7.20.5",
+		"eslint-plugin-react-hooks": "^4.0.8",
+		"eslint-plugin-security": "^1.4.0",
+		"eslint-plugin-sonarjs": "^0.5.0",
+		"eslint-plugin-standard": "^4.0.1",
+		"prettier": "^1.19.1",
+		"ts-node": "^8.10.2",
+		"tsconfig-paths": "^3.9.0",
+		"typescript": "^3.9.7"
+	}
+}

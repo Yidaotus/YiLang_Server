@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"pretty": true,
+		"target": "es6",
+		"resolveJsonModule": true,
+		"noImplicitAny": true,
+		"lib": ["es6", "ES2019", "dom"],
+		"esModuleInterop": true,
+		"allowJs": true,
+		"outDir": "./build",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"rootDir": "./src"
+	},
+	"include": ["src/**/*"]
+}

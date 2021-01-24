@@ -1,0 +1,15 @@
+{
+	"db": {
+		"connectionString": "mongodb://localhost/yitext"
+	},
+	"baseUrl": "localhost:3000",
+	"secret": "",
+	"mail": {
+		"host": "smtp.ethereal.email",
+		"port": 587,
+		"auth": {
+			"user": "ktbzim577dzak3ho@ethereal.email",
+			"pass": "cZrP2594cjcVrAyYnW"
+		}
+	}
+}

@@ -1,0 +1,10 @@
+{
+	"semi": true,
+	"singleQuote": true,
+	"tabWidth": 4,
+	"useTabs": true,
+	"arrowParens": "always",
+	"object-curly-newline": ["error", { "multiline": true }],
+	"endOfLine": "auto",
+	"trailingComma": "es5"
+}

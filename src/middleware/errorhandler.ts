@@ -1,0 +1,35 @@
+import { IApiRequest } from '../routes';
+import { NextFunction, Response } from 'express';
+import { IApiResponse, ApiStatus, ApiStatuses } from '../helpers/api';
+import YiErrors from '../helpers/errors';
+
+const errorHandler = async (
+	err: Error,
+	req: IApiRequest<unknown>,
+	res: Response,
+	next: NextFunction
+): Promise<Response<unknown>> => {
+	let status: ApiStatus = ApiStatuses.ERROR;
+	let message = err.message;
+	if (err) {
+		if (err.name === YiErrors.VALIDATION_ERROR) {
+			status = ApiStatuses.INVALIDARGUMENT;
+			message = err.message || 'Invalid parameters!';
+		} else {
+			const errName = err.name;
+			if (errName.indexOf('invalid_grant') > -1) {
+				res.clearCookie('3rdpartyoauth');
+				status = ApiStatuses.UNAUTHORIZED;
+			}
+		}
+		const response: IApiResponse<void> = {
+			status,
+			message,
+		};
+		return res.status(400).json(response);
+	} else {
+		next();
+	}
+};
+
+export { errorHandler };

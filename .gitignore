@@ -1,0 +1,8 @@
+node_modules/*
+config/config.json
+config/development.json
+config/secret.key
+.vscode/*
+build/*
+certs/*.key
+certs/*.crt
