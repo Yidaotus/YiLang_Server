@@ -1,18 +1,25 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
-import { nextTick } from 'process';
+import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
 
-
-export interface IDictionaryEntry extends Document {
+export interface IDictionaryEntry {
+	id: ObjectId;
 	word: string;
 	translation: string;
 	lang: string;
 	userId: Schema.Types.ObjectId;
 	binkey?: string;
+	createdAt: Date;
+	updatedAt: Date;
+	deletedAt: Date;
 }
 
-export interface IDictionaryEntryModel extends Model<IDictionaryEntry> {}
+type IDictionaryEntryDocument = IDictionaryEntry & Document;
+export interface IDictionaryEntryModel
+	extends Model<IDictionaryEntryDocument> {}
 
-const DictionaryEntrySchema: Schema = new Schema(
+const DictionaryEntrySchema = new Schema<
+	IDictionaryEntryDocument,
+	IDictionaryEntryModel
+>(
 	{
 		word: { type: String, required: true },
 		translation: { type: String, required: true },
@@ -31,7 +38,7 @@ DictionaryEntrySchema.index({ word: 1, lang: 1, userId: 1 }, { unique: true });
 DictionaryEntrySchema.set('toJSON', {
 	virtuals: true,
 	versionKey: false,
-	transform: function(doc, ret) {
+	transform: function(_: unknown, ret: IDictionaryEntryDocument) {
 		delete ret._id;
 		delete ret.id;
 		delete ret.userId;
@@ -41,7 +48,7 @@ DictionaryEntrySchema.set('toJSON', {
 	},
 });
 
-DictionaryEntrySchema.pre<IDictionaryEntry>('save', function(next) {
+DictionaryEntrySchema.pre<IDictionaryEntryDocument>('save', function(next) {
 	this.binkey = this.word
 		.split('')
 		.map((char) =>
@@ -54,7 +61,7 @@ DictionaryEntrySchema.pre<IDictionaryEntry>('save', function(next) {
 	next();
 });
 
-export default mongoose.model<IDictionaryEntry, IDictionaryEntryModel>(
+export default mongoose.model<IDictionaryEntryDocument, IDictionaryEntryModel>(
 	'DictionaryEntry',
 	DictionaryEntrySchema
 );

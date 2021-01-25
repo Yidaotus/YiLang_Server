@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document, DocumentQuery, Model } from 'mongoose';
-import { string } from 'joi';
+import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
+import { IDocumentParam } from '../helpers/api';
 
 export type UserRole = 'user' | 'admin' | 'moderator';
 
@@ -8,7 +8,8 @@ interface IVerificationToken {
 	expires: Date;
 }
 
-export interface IUser extends Document {
+export interface IUser {
+	id: ObjectId;
 	email: string;
 	password: string;
 	username: string;
@@ -21,12 +22,13 @@ export interface IUser extends Document {
 	deletedAt: Date;
 }
 
-export interface IUserModel extends Model<IUser> {
-	findActiveById(id: string): Promise<IUser>;
-	findActiveByMail(email: string): Promise<IUser>;
+type IUserDocument = IUser & Document;
+export interface IUserModel extends Model<IUserDocument> {
+	findActiveById(id: string): Promise<IUserDocument>;
+	findActiveByMail(email: string): Promise<IUserDocument>;
 }
 
-const UserSchema: Schema = new Schema(
+const UserSchema = new Schema<IUserDocument, IUserModel>(
 	{
 		email: { type: String, unique: true, required: true },
 		password: { type: String, required: true },
@@ -52,12 +54,13 @@ const UserSchema: Schema = new Schema(
 UserSchema.set('toJSON', {
 	virtuals: true,
 	versionKey: false,
-	transform: function(doc, ret) {
+	transform: function(_: unknown, ret: IUserDocument) {
 		delete ret._id;
 		delete ret.password;
 		delete ret.verifiedAt;
 		delete ret.createdAt;
 		delete ret.updatedAt;
+		delete ret.deletedAt;
 	},
 });
 
@@ -65,7 +68,7 @@ UserSchema.statics.findActiveById = function(id: string) {
 	return this.findOne({
 		_id: id,
 		verifiedAt: {
-			$lt: Date.now(),
+			$lt: new Date(),
 		},
 	}).exec();
 };
@@ -77,9 +80,9 @@ UserSchema.statics.findActiveByMail = function(email: string) {
 			$options: 'i',
 		},
 		verifiedAt: {
-			$lt: Date.now(),
+			$lt: new Date(),
 		},
 	}).exec();
 };
 
-export default mongoose.model<IUser, IUserModel>('User', UserSchema);
+export default mongoose.model<IUserDocument, IUserModel>('User', UserSchema);

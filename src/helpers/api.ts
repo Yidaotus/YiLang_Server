@@ -1,3 +1,5 @@
+import { ObjectId } from "mongoose";
+
 export type DictionaryEntryField =
 	| 'word'
 	| 'translation'
@@ -98,7 +100,7 @@ export interface ILoginParams {
 }
 
 export interface IUserResponseData {
-	id?: number;
+	id?: ObjectId;
 	email: string;
 	username: string;
 }
