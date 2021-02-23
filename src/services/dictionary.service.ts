@@ -49,7 +49,7 @@ const findOccurances = async ({
 	};
 
 	for (const entry of dictionary) {
-		radix.insert(rootRadix, entry.word, entry.toJSON());
+		radix.insert(rootRadix, entry.key, entry.toJSON());
 	}
 
 	let occurances = new Array<IFragementData>();

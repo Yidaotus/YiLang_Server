@@ -25,6 +25,13 @@ const getEntrySchema = Joi.object({
 	key: Joi.string().required(),
 });
 
+const getEntriesSchema = Joi.object({
+	lang: Joi.string()
+		.required()
+		.min(2)
+		.max(5),
+});
+
 const entrySchema = Joi.object({
 	word: Joi.string().required(),
 	translation: Joi.string().required(),
@@ -67,6 +74,13 @@ router[ApiEndpoints.delete.method](
 	jwtGuard,
 	validate(entrySchema, 'body'),
 	DictController.deleteEntry
+);
+
+router[ApiEndpoints.getAll.method](
+	`/${ApiEndpoints.getAll.path}/:lang`,
+	jwtGuard,
+	validate(getEntriesSchema, 'params'),
+	DictController.getEntry
 );
 
 router[ApiEndpoints.get.method](

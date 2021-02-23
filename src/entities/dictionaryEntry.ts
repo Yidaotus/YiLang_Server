@@ -1,10 +1,8 @@
 import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
+import { IDictionaryEntryData } from '../helpers/api';
 
-export interface IDictionaryEntry {
+export interface IDictionaryEntry extends IDictionaryEntryData {
 	id: ObjectId;
-	word: string;
-	translation: string;
-	lang: string;
 	userId: Schema.Types.ObjectId;
 	binkey?: string;
 	createdAt: Date;
@@ -49,7 +47,7 @@ DictionaryEntrySchema.set('toJSON', {
 });
 
 DictionaryEntrySchema.pre<IDictionaryEntryDocument>('save', function(next) {
-	this.binkey = this.word
+	this.binkey = this.key
 		.split('')
 		.map((char) =>
 			char

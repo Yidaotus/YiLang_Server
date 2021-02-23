@@ -13,6 +13,38 @@ import { IPriviligedRequest } from '../routes';
 import DictionaryEntry, { IDictionaryEntry } from '../entities/dictionaryEntry';
 import * as DictionaryService from '../services/dictionary.service';
 
+const getAll = async (
+	req: IPriviligedRequest<void>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const lang = req.params.lang as string;
+	try {
+		//await UserService.register(userDetails, verificationUrl);
+		const entries: IDictionaryEntry[] = await DictionaryEntry.find({
+			lang,
+		}).exec();
+
+		let response: IApiResponse<IDictionaryEntryData[]>;
+		if (entries.length > 0) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Entries found!',
+				payload: entries,
+			};
+		} else {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'No entries found!',
+			};
+		}
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
 const getEntry = async (
 	req: IPriviligedRequest<void>,
 	res: Response,
@@ -72,7 +104,7 @@ const addEntries = async (
 };
 
 const modifyEntry = async (
-	req: IPriviligedRequest<IDictionaryEntryParams>,
+	req: IPriviligedRequest<IDictionaryEntryData>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -80,13 +112,13 @@ const modifyEntry = async (
 	try {
 		//await UserService.register(userDetails, verificationUrl);
 		const entry = await DictionaryEntry.findOne({
-			word: oldEntry.word,
+			key: oldEntry.key,
 		}).exec();
 
 		let response: IApiResponse<void>;
 
 		if (entry) {
-			entry.translation = oldEntry.translation;
+			entry.translations = oldEntry.translations;
 			await entry.save();
 			response = {
 				status: ApiStatuses.OK,
@@ -174,10 +206,14 @@ const analyzeDocument = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const {document, lang} = req.body;
+	const { document, lang } = req.body;
 	const userId = req.user.id;
 
-	const entries = await DictionaryService.findOccurances({lang, document, userId});
+	const entries = await DictionaryService.findOccurances({
+		lang,
+		document,
+		userId,
+	});
 
 	let response: IApiResponse<IFragementData[]>;
 	if (entries.length > 0) {

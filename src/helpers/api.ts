@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { ObjectId } from 'mongoose';
 
 export type DictionaryEntryField =
 	| 'word'
@@ -65,6 +65,10 @@ const ApiPaths: { [key: string]: ApiPath } = {
 			delete: {
 				path: 'entry',
 				method: 'delete',
+			},
+			getAll: {
+				path: 'entries',
+				method: 'get',
 			},
 			get: {
 				path: 'entry',
@@ -135,10 +139,52 @@ export interface IFragementData {
 	entries: IDictionaryEntryData[];
 }
 
-export interface IDictionaryEntryData {
-	word: string;
+export interface IEntryTag {
+	name: string;
+	color?: string;
+	comment?: string; // Te versions are used for conjugation ect..
+}
+
+interface ITextPosition {
+	start: number;
+	end: number;
+}
+
+interface ISource<T> {
+	pos: ITextPosition;
+	source: T;
+}
+
+interface IDictionaryVariant {
+	key: string;
+	tags: IEntryTag[];
+	comment: string;
+	spelling?: string;
+}
+
+export interface ISentence {
+	content: string;
 	translation: string;
-	lang: string;
+}
+
+interface IDocument {
+	title: string;
+	content: string;
+	language: string;
+	source?: string;
+}
+
+export interface IDictionaryEntryData {
+	key: string;
+	language: string;
+	translations: string[];
+	sourceDocument?: ISource<IDocument>;
+	firstSeen?: ISource<ISentence>;
+	tags: IEntryTag[];
+	// type: IEntryType;
+	comment?: string;
+	spelling?: string;
+	variations: IDictionaryVariant[];
 }
 
 export interface IDictionaryFetchParams {
