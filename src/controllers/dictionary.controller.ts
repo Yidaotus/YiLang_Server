@@ -8,9 +8,13 @@ import {
 	IDocumentParam,
 	IFragementData,
 	ApiStatuses,
+	IDictionaryDelta,
 } from '../helpers/api';
 import { IPriviligedRequest } from '../routes';
-import DictionaryEntry, { IDictionaryEntry } from '../entities/dictionaryEntry';
+import DictionaryEntry, {
+	IDictionaryEntry,
+	IDictionaryEntryModel,
+} from '../entities/dictionaryEntry';
 import * as DictionaryService from '../services/dictionary.service';
 
 const getAll = async (
@@ -79,8 +83,51 @@ const getEntry = async (
 	}
 };
 
+const applyDelta = async (
+	req: IPriviligedRequest<IDictionaryDelta>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const { removedEntries, updatedEntries, addedEntries } = req.body;
+	try {
+		const removedUserEntries = {
+			entryId: { $in: removedEntries },
+			userId: req.user.id,
+		};
+		await DictionaryEntry.deleteMany(removedUserEntries);
+
+		const addedUserEntries = addedEntries.map((entry) => {
+			const entryId = Object.keys(entry)[0];
+			const obEntry = Object.values(entry)[0];
+			return {
+				entryId,
+				...obEntry,
+				userId: req.user.id,
+			};
+		});
+		await DictionaryEntry.create(addedUserEntries);
+
+		await updatedEntries.map(async (entry) => {
+			const entryId = Object.keys(entry)[0];
+			const obEntry = Object.values(entry)[0];
+			await DictionaryEntry.updateOne(
+				{ entryId, userId: req.user.id },
+				{ ...obEntry }
+			);
+		});
+
+		const response: IApiResponse<void> = {
+			status: ApiStatuses.OK,
+			message: 'Entrie(s) added successful!',
+		};
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
 const addEntries = async (
-	req: IPriviligedRequest<IDictionaryEntryParams[]>,
+	req: IPriviligedRequest<IDictionaryEntryData[]>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -95,7 +142,7 @@ const addEntries = async (
 
 		const response: IApiResponse<void> = {
 			status: ApiStatuses.OK,
-			message: 'Word added Successfull!',
+			message: 'Entrie(s) added successful!',
 		};
 		res.status(200).json(response);
 	} catch (err) {
@@ -236,7 +283,9 @@ export {
 	addEntries,
 	modifyEntry,
 	deleteEntry,
+	applyDelta,
 	getEntry,
+	getAll,
 	fetchEntries,
 	analyzeDocument,
 };

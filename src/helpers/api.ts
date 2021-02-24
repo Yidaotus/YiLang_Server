@@ -55,7 +55,11 @@ const ApiPaths: { [key: string]: ApiPath } = {
 		path: 'dict',
 		endpoints: {
 			add: {
-				path: 'entry',
+				path: 'entries',
+				method: 'post',
+			},
+			applyDelta: {
+				path: 'delta',
 				method: 'post',
 			},
 			modify: {
@@ -170,13 +174,20 @@ export interface ISentence {
 interface IDocument {
 	title: string;
 	content: string;
-	language: string;
+	lang: string;
 	source?: string;
 }
 
+export interface IDictionaryDelta {
+	removedEntries: Array<string>;
+	updatedEntries: Array<{ [key: string]: IDictionaryEntryData }>;
+	addedEntries: Array<{ [key: string]: IDictionaryEntryData }>;
+}
+
 export interface IDictionaryEntryData {
+	entryId: string;
 	key: string;
-	language: string;
+	lang: string;
 	translations: string[];
 	sourceDocument?: ISource<IDocument>;
 	firstSeen?: ISource<ISentence>;

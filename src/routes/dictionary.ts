@@ -16,7 +16,6 @@ const documentSchema = Joi.object({
 	document: Joi.string().required(),
 });
 
-
 const getEntrySchema = Joi.object({
 	lang: Joi.string()
 		.required()
@@ -33,12 +32,45 @@ const getEntriesSchema = Joi.object({
 });
 
 const entrySchema = Joi.object({
-	word: Joi.string().required(),
-	translation: Joi.string().required(),
+	key: Joi.string().required(),
+	translations: Joi.array()
+		.items(Joi.string())
+		.required(),
 	lang: Joi.string()
 		.required()
 		.min(2)
 		.max(5),
+	sourceDocument: Joi.string().optional(),
+	firstSeen: Joi.string().optional(),
+	tags: Joi.array().items(
+		Joi.object({
+			name: Joi.string(),
+			color: Joi.string().optional(),
+			comment: Joi.string().optional(),
+		})
+	),
+	comment: Joi.string().optional(),
+	spelling: Joi.string().optional(),
+	variations: Joi.array().items(
+		Joi.object({
+			key: Joi.string().required(),
+			tags: Joi.array().items(
+				Joi.object({
+					name: Joi.string(),
+					color: Joi.string().optional().allow(''),
+					comment: Joi.string().optional().allow(''),
+				})
+			),
+			comment: Joi.string().optional().allow(''),
+			spelling: Joi.string().optional().allow(''),
+		})
+	),
+});
+
+const deltaSchema = Joi.object({
+	removedEntries: Joi.array().items(Joi.string()),
+	updatedEntries: Joi.array().items(Joi.object().pattern(/^/, entrySchema)),
+	addedEntries: Joi.array().items(Joi.object().pattern(/^/, entrySchema)),
 });
 
 const fetchSchema = Joi.object({
@@ -54,6 +86,13 @@ const fetchSchema = Joi.object({
 		.optional(),
 	skip: Joi.number().optional(),
 });
+
+router[ApiEndpoints.applyDelta.method](
+	`/${ApiEndpoints.applyDelta.path}`,
+	jwtGuard,
+	validate(deltaSchema, 'body'),
+	DictController.applyDelta
+);
 
 router[ApiEndpoints.add.method](
 	`/${ApiEndpoints.add.path}`,
@@ -80,7 +119,7 @@ router[ApiEndpoints.getAll.method](
 	`/${ApiEndpoints.getAll.path}/:lang`,
 	jwtGuard,
 	validate(getEntriesSchema, 'params'),
-	DictController.getEntry
+	DictController.getAll
 );
 
 router[ApiEndpoints.get.method](

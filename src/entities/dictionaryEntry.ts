@@ -19,9 +19,14 @@ const DictionaryEntrySchema = new Schema<
 	IDictionaryEntryModel
 >(
 	{
-		word: { type: String, required: true },
-		translation: { type: String, required: true },
+		entryId: { type: String, required: true },
+		key: { type: String, required: true },
+		translations: { type: Schema.Types.Array, required: true },
 		lang: { type: String, required: true, minlength: 2, maxlength: 5 },
+		tags: { type: Schema.Types.Array, required: true },
+		variations: { type: Schema.Types.Array, required: false },
+		comment: { type: String, required: false },
+		spelling: { type: String, required: false },
 		userId: { type: Schema.Types.ObjectId, required: true },
 		binkey: { type: String },
 		createdAt: Date,
