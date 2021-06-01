@@ -41,11 +41,14 @@ var BlockModel = model<BaseBlock>('Block', blockSchema);
 );*/
 
 // 2. Create a Schema corresponding to the document interface.
-const docSchema = new Schema<User>({
-	name: { type: String, required: true },
-	email: { type: String, required: true },
-	blocks: [blockSchema],
-});
+const docSchema = new Schema<User>(
+	{
+		name: { type: String, required: true },
+		email: { type: String, required: true },
+		blocks: [blockSchema],
+	},
+	{ timestamps: true }
+);
 
 //var blockArray = docSchema.path('events') as mongoose.Schema.Types.DocumentArray;
 var blockArray = docSchema.path(
@@ -54,6 +57,10 @@ var blockArray = docSchema.path(
 blockArray.discriminator(
 	'Title',
 	new Schema({ title: String }, discriminatorOption)
+);
+blockArray.discriminator(
+	'Paragraph',
+	new Schema({ paragraph: String }, discriminatorOption)
 );
 // 3. Create a Model.
 const UserModel = model<User>('Docs', docSchema);
@@ -70,19 +77,32 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', async () => {
 	try {
+		const name = Date.now().toString();
 		const newUser = new UserModel({
-			name: 'Test',
+			name,
 			email: 12,
 			blocks: [
 				{
 					fid: 'x',
 					type: 'Title',
-					title: 'Hi',
+					title: 'Hi T',
+				},
+				{
+					fid: 'x2',
+					type: 'Paragraph',
+					paragraph: 'Hi P',
+				},
+				{
+					fid: 'x',
+					type: 'NOne',
 				},
 			],
 		});
 		await newUser.save();
 		console.log(newUser.blocks[0].type);
+		const foundUser = await UserModel.findOne({ name }).exec();
+		const fUo = foundUser.toObject();
+		console.log(fUo);
 	} catch (e) {
 		console.log(e);
 	}
