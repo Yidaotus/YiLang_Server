@@ -1,54 +1,89 @@
-import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
-import { IDocument } from '../Document/Document';
-import { BlockElement } from '../Document/Fragment';
+import { config } from '../helpers/config';
+import mongoose, { Schema, model, connect } from 'mongoose';
 
-export interface IDocumentModel extends IDocument {
-	_id: ObjectId;
-	userId: Schema.Types.ObjectId;
-	binkey?: string;
-	createdAt: Date;
-	updatedAt: Date;
-	deletedAt: Date;
+interface BaseBlock {
+	type: 'Title' | 'Paragraph';
+	fid: string;
 }
 
-type IDocumentDBDocument = IDocumentModel & Document;
-export interface IDocumentDBModel extends Model<IDocumentDBDocument> {}
+interface TitleBlock extends BaseBlock {
+	type: 'Title';
+	title: string;
+}
 
-const DocumentSchema = new Schema<IDocumentDBDocument, IDocumentDBModel>(
+interface ParagraphBlock extends BaseBlock {
+	type: 'Paragraph';
+	paragraph: string;
+}
+
+// 1. Create an interface representing a document in MongoDB.
+interface User {
+	name: string;
+	email: string;
+	blocks: Array<TitleBlock | ParagraphBlock>;
+}
+
+const discriminatorOption = {
+	discriminatorKey: 'type',
+	_id: false,
+};
+
+const blockSchema = new Schema<BaseBlock>(
 	{
-		entryId: { type: String, required: true },
-		key: { type: String, required: true },
-		translations: { type: Schema.Types.Array, required: true },
-		lang: { type: String, required: true, minlength: 2, maxlength: 5 },
-		tags: { type: Schema.Types.Array, required: true },
-		variations: { type: Schema.Types.Array, required: false },
-		comment: { type: String, required: false },
-		spelling: { type: String, required: false },
-		userId: { type: Schema.Types.ObjectId, required: true },
-		binkey: { type: String },
-		createdAt: Date,
-		updatedAt: Date,
-		deletedAt: Date,
+		fid: { type: String, required: true },
 	},
-	{ timestamps: true }
+	discriminatorOption
 );
+var BlockModel = model<BaseBlock>('Block', blockSchema);
+/*var TitleBlockModel = BlockModel.discriminator(
+	'Title',
+	new Schema({ title: String }, discriminatorOption)
+);*/
 
-DocumentSchema.index({ word: 1, lang: 1, userId: 1 }, { unique: true });
-
-DocumentSchema.set('toJSON', {
-	virtuals: true,
-	versionKey: false,
-	transform: function(_: unknown, ret: IDocumentDBDocument) {
-		delete ret._id;
-		delete ret.id;
-		delete ret.userId;
-		delete ret.deletedAt;
-		delete ret.updatedAt;
-		delete ret.binkey;
-	},
+// 2. Create a Schema corresponding to the document interface.
+const docSchema = new Schema<User>({
+	name: { type: String, required: true },
+	email: { type: String, required: true },
+	blocks: [blockSchema],
 });
 
-export default mongoose.model<IDocumentDBDocument, IDocumentDBModel>(
-	'DictionaryEntry',
-	DocumentSchema
+//var blockArray = docSchema.path('events') as mongoose.Schema.Types.DocumentArray;
+var blockArray = docSchema.path(
+	'blocks'
+) as mongoose.Schema.Types.DocumentArray;
+blockArray.discriminator(
+	'Title',
+	new Schema({ title: String }, discriminatorOption)
 );
+// 3. Create a Model.
+const UserModel = model<User>('Docs', docSchema);
+
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+var mongoDB = config.db.connectionString;
+mongoose.connect(mongoDB, { useNewUrlParser: true });
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection YiErrors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', async () => {
+	try {
+		const newUser = new UserModel({
+			name: 'Test',
+			email: 12,
+			blocks: [
+				{
+					fid: 'x',
+					type: 'Title',
+					title: 'Hi',
+				},
+			],
+		});
+		await newUser.save();
+		console.log(newUser.blocks[0].type);
+	} catch (e) {
+		console.log(e);
+	}
+});
