@@ -1,98 +1,54 @@
-import { prop, getModelForClass } from '@typegoose/typegoose';
-import { getUUID, UUID } from '../Document/UUID';
+import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
+import { IDocument } from '../Document/Document';
+import { BlockElement } from '../Document/Fragment';
 
-class MarkFragment {
-	color: string;
-	comment?: string;
-}
-
-class WordFragment {
-	dictId: UUID;
-}
-
-class SentenceFragment {
-	translation: string;
-	words: Array<WordFragment>;
-}
-
-class NoteFragment {
-	note: string;
-}
-
-interface IFragmentableRange {
-	start: number;
-	end: number;
-}
-
-class BlockFragment<T> {
-	@prop()
-	public id: UUID;
-	@prop()
-	public range: IFragmentableRange;
-	@prop()
-	public fragmented?: 'left' | 'right';
-	@prop()
-	public data: T;
-}
-
-class FragmentableString {
-	@prop()
-	public id: UUID;
-	@prop()
-	public root: string;
-	@prop({ type: () => BlockFragment })
-	public fragments: BlockFragment<unknown>[];
-	@prop()
-	public showSpelling: boolean;
-	@prop()
-	public highlightedFragment?: UUID;
-}
-
-interface IDialogBlockLine {
-	speaker: string;
-	speech: UUID;
-}
-
-class DocumentBlock {
-	@prop()
-	public position: number;
-	@prop()
-	public id: UUID;
-	@prop({ type: () => FragmentableString })
-	public fragmentables: FragmentableString[];
-}
-
-class DialogBlock extends DocumentBlock {
-	lines: IDialogBlockLine[];
-}
-
-class ImageBlock extends DocumentBlock {
-	source: string;
-	title?: string;
-}
-
-class TitleBlock extends DocumentBlock {
-	content: UUID;
-}
-
-class ParagraphBlock extends DocumentBlock {
-	content: UUID;
-}
-
-interface IYiDocument {
+export interface IDocumentModel extends IDocument {
+	_id: ObjectId;
+	userId: Schema.Types.ObjectId;
+	binkey?: string;
 	createdAt: Date;
 	updatedAt: Date;
-	id: UUID;
-	blocks: Array<DocumentBlock>;
+	deletedAt: Date;
 }
 
-class YiDocument implements IYiDocument {
-	@prop()
-	public updatedAt: Date;
-	@prop()
-	public createdAt: Date;
-	@prop()
-	public id: UUID;
-	@prop({ type: () => DocumentBlock })
-	public blocks: DocumentBlock[];
-}
+type IDocumentDBDocument = IDocumentModel & Document;
+export interface IDocumentDBModel extends Model<IDocumentDBDocument> {}
+
+const DocumentSchema = new Schema<IDocumentDBDocument, IDocumentDBModel>(
+	{
+		entryId: { type: String, required: true },
+		key: { type: String, required: true },
+		translations: { type: Schema.Types.Array, required: true },
+		lang: { type: String, required: true, minlength: 2, maxlength: 5 },
+		tags: { type: Schema.Types.Array, required: true },
+		variations: { type: Schema.Types.Array, required: false },
+		comment: { type: String, required: false },
+		spelling: { type: String, required: false },
+		userId: { type: Schema.Types.ObjectId, required: true },
+		binkey: { type: String },
+		createdAt: Date,
+		updatedAt: Date,
+		deletedAt: Date,
+	},
+	{ timestamps: true }
+);
+
+DocumentSchema.index({ word: 1, lang: 1, userId: 1 }, { unique: true });
+
+DocumentSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function(_: unknown, ret: IDocumentDBDocument) {
+		delete ret._id;
+		delete ret.id;
+		delete ret.userId;
+		delete ret.deletedAt;
+		delete ret.updatedAt;
+		delete ret.binkey;
+	},
+});
+
+export default mongoose.model<IDocumentDBDocument, IDocumentDBModel>(
+	'DictionaryEntry',
+	DocumentSchema
+);

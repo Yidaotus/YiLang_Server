@@ -6,7 +6,8 @@ export interface IDocument {
 	createdAt: Date;
 	updatedAt: Date;
 	id: UUID;
-	blocks: Array<DocumentBlock>;
+	blocks: { [key: string]: DocumentBlock };
+	positions: { [key: string]: number };
 }
 
 export enum HighlightStyle {
