@@ -1,5 +1,7 @@
-import { prop, getModelForClass } from '@typegoose/typegoose';
-import { getUUID, UUID } from '../Document/UUID';
+import { prop, getModelForClass, modelOptions } from '@typegoose/typegoose';
+import mongoose from 'mongoose';
+import { config } from './helpers/config';
+import { getUUID, UUID } from './Document/UUID';
 
 class MarkFragment {
 	color: string;
@@ -86,13 +88,31 @@ interface IYiDocument {
 	blocks: Array<DocumentBlock>;
 }
 
-class YiDocument implements IYiDocument {
+@modelOptions({ options: { customName: 'YiDoc' } })
+class YiDocument {
 	@prop()
-	public updatedAt: Date;
-	@prop()
-	public createdAt: Date;
-	@prop()
-	public id: UUID;
+	public frId: UUID;
 	@prop({ type: () => DocumentBlock })
 	public blocks: DocumentBlock[];
+
+	constructor() {
+		this.blocks = new Array<DocumentBlock>();
+		this.frId = getUUID();
+	}
 }
+
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+var mongoDB = config.db.connectionString;
+mongoose.connect(mongoDB, { useNewUrlParser: true });
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection YiErrors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', async () => {
+	const YiDocumentModel = getModelForClass(YiDocument);
+	let document = await YiDocumentModel.create(new YiDocument());
+	console.log(document);
+});
