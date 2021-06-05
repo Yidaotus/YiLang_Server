@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
-import { IDocumentParam } from '../helpers/api';
 
 export type UserRole = 'user' | 'admin' | 'moderator';
 

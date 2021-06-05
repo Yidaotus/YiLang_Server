@@ -57,12 +57,20 @@ const entrySchema = Joi.object({
 			tags: Joi.array().items(
 				Joi.object({
 					name: Joi.string(),
-					color: Joi.string().optional().allow(''),
-					comment: Joi.string().optional().allow(''),
+					color: Joi.string()
+						.optional()
+						.allow(''),
+					comment: Joi.string()
+						.optional()
+						.allow(''),
 				})
 			),
-			comment: Joi.string().optional().allow(''),
-			spelling: Joi.string().optional().allow(''),
+			comment: Joi.string()
+				.optional()
+				.allow(''),
+			spelling: Joi.string()
+				.optional()
+				.allow(''),
 		})
 	),
 });
@@ -90,7 +98,6 @@ const fetchSchema = Joi.object({
 router[ApiEndpoints.applyDelta.method](
 	`/${ApiEndpoints.applyDelta.path}`,
 	jwtGuard,
-	validate(deltaSchema, 'body'),
 	DictController.applyDelta
 );
 
@@ -136,11 +143,13 @@ router[ApiEndpoints.fetch.method](
 	DictController.fetchEntries
 );
 
+/* 
 router[ApiEndpoints.analyze.method](
 	`/${ApiEndpoints.analyze.path}`,
 	jwtGuard,
 	validate(documentSchema, 'body'),
 	DictController.analyzeDocument
 );
+*/
 
 export default router;

@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongoose';
+import { IDictionaryEntry } from '../Document/Dictionary';
 
 export type DictionaryEntryField =
 	| 'word'
@@ -138,64 +139,10 @@ export interface IDictionaryEntryParams {
 	lang: string;
 }
 
-export interface IFragementData {
-	position: number;
-	entries: IDictionaryEntryData[];
-}
-
-export interface IEntryTag {
-	name: string;
-	color?: string;
-	comment?: string; // Te versions are used for conjugation ect..
-}
-
-interface ITextPosition {
-	start: number;
-	end: number;
-}
-
-interface ISource<T> {
-	pos: ITextPosition;
-	source: T;
-}
-
-interface IDictionaryVariant {
-	key: string;
-	tags: IEntryTag[];
-	comment: string;
-	spelling?: string;
-}
-
-export interface ISentence {
-	content: string;
-	translation: string;
-}
-
-interface IDocument {
-	title: string;
-	content: string;
-	lang: string;
-	source?: string;
-}
-
 export interface IDictionaryDelta {
 	removedEntries: Array<string>;
-	updatedEntries: Array<{ [key: string]: IDictionaryEntryData }>;
-	addedEntries: Array<{ [key: string]: IDictionaryEntryData }>;
-}
-
-export interface IDictionaryEntryData {
-	entryId: string;
-	key: string;
-	lang: string;
-	translations: string[];
-	sourceDocument?: ISource<IDocument>;
-	firstSeen?: ISource<ISentence>;
-	tags: IEntryTag[];
-	// type: IEntryType;
-	comment?: string;
-	spelling?: string;
-	variations: IDictionaryVariant[];
+	updatedEntries: Array<{ [key: string]: IDictionaryEntry }>;
+	addedEntries: Array<{ [key: string]: IDictionaryEntry }>;
 }
 
 export interface IDictionaryFetchParams {
@@ -203,9 +150,4 @@ export interface IDictionaryFetchParams {
 	lang: string;
 	limit: number;
 	skip: number;
-}
-
-export interface IDocumentParam {
-	document: string;
-	lang: string;
 }

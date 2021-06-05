@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
-import { IDictionaryEntryData } from '../helpers/api';
+import { IDictionaryEntry } from '../Document/Dictionary';
 
-export interface IDictionaryEntry extends IDictionaryEntryData {
-	id: ObjectId;
+export interface IDictionaryEntryDB extends IDictionaryEntry {
+	_id: ObjectId;
 	userId: Schema.Types.ObjectId;
 	binkey?: string;
 	createdAt: Date;
@@ -10,7 +10,7 @@ export interface IDictionaryEntry extends IDictionaryEntryData {
 	deletedAt: Date;
 }
 
-type IDictionaryEntryDocument = IDictionaryEntry & Document;
+type IDictionaryEntryDocument = IDictionaryEntryDB & Document;
 export interface IDictionaryEntryModel
 	extends Model<IDictionaryEntryDocument> {}
 

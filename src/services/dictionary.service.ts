@@ -1,7 +1,10 @@
-import DictionaryEntry, { IDictionaryEntry } from '../entities/dictionaryEntry';
+import DictionaryEntry, {
+	IDictionaryEntryDB,
+} from '../entities/dictionaryEntry';
 import { Schema } from 'mongoose';
 import * as radix from '../helpers/Radix';
-import { IFragementData, DictionaryEntryField } from '../helpers/api';
+import { DictionaryEntryField } from '../helpers/api';
+import { IDictionaryEntry } from '../Document/Dictionary';
 
 const fetch = async ({
 	sortBy,
@@ -15,8 +18,8 @@ const fetch = async ({
 	userId: Schema.Types.ObjectId;
 	limit: number;
 	skip: number;
-}): Promise<IDictionaryEntry[]> => {
-	const entries: IDictionaryEntry[] = await DictionaryEntry.find({
+}): Promise<IDictionaryEntryDB[]> => {
+	const entries: IDictionaryEntryDB[] = await DictionaryEntry.find({
 		lang,
 		userId,
 	})
@@ -42,17 +45,20 @@ const findOccurances = async ({
 		userId,
 	});
 
-	let rootRadix: radix.IRadixNode<IDictionaryEntry> = {
+	let rootRadix: radix.IRadixNode<IDictionaryEntryDB> = {
 		value: null,
 		key: '',
-		edges: new Array<radix.IRadixEdge<IDictionaryEntry>>(),
+		edges: new Array<radix.IRadixEdge<IDictionaryEntryDB>>(),
 	};
 
 	for (const entry of dictionary) {
 		radix.insert(rootRadix, entry.key, entry.toJSON());
 	}
 
-	let occurances = new Array<IFragementData>();
+	let occurances = new Array<{
+		position: number;
+		entries: Array<IDictionaryEntry>;
+	}>();
 	for (let i = 0; i < document.length; i++) {
 		let finds = new Array<IDictionaryEntry>();
 		radix.findAll(

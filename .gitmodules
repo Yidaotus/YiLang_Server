@@ -1,0 +1,3 @@
+[submodule "src/Document"]
+	path = src/Document
+	url = git@github.com:Yidaotus/YiLang_Document.git

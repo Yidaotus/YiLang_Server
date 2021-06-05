@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { ApiStatus, ApiStatuses, IApiResponse, ITokenData } from '../helpers/api';
+import { ApiStatuses, IApiResponse, ITokenData } from '../helpers/api';
 import { IPriviligedRequest, IApiRequest } from '../routes/';
 import User from '../entities/user';
 

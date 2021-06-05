@@ -1,21 +1,14 @@
 import { Response, NextFunction } from 'express';
 import {
 	IApiResponse,
-	ApiStatus,
-	IDictionaryEntryParams,
-	IDictionaryEntryData,
-	IDictionaryFetchParams,
-	IDocumentParam,
-	IFragementData,
 	ApiStatuses,
 	IDictionaryDelta,
+	IDictionaryFetchParams,
 } from '../helpers/api';
 import { IPriviligedRequest } from '../routes';
-import DictionaryEntry, {
-	IDictionaryEntry,
-	IDictionaryEntryModel,
-} from '../entities/dictionaryEntry';
+import DictionaryEntry from '../entities/dictionaryEntry';
 import * as DictionaryService from '../services/dictionary.service';
+import { IDictionaryEntry } from '../Document/Dictionary';
 
 const getAll = async (
 	req: IPriviligedRequest<void>,
@@ -29,7 +22,7 @@ const getAll = async (
 			lang,
 		}).exec();
 
-		let response: IApiResponse<IDictionaryEntryData[]>;
+		let response: IApiResponse<IDictionaryEntry[]>;
 		if (entries.length > 0) {
 			response = {
 				status: ApiStatuses.OK,
@@ -63,7 +56,7 @@ const getEntry = async (
 			lang,
 		}).exec();
 
-		let response: IApiResponse<IDictionaryEntryData[]>;
+		let response: IApiResponse<IDictionaryEntry[]>;
 		if (entry.length > 0) {
 			response = {
 				status: ApiStatuses.OK,
@@ -127,7 +120,7 @@ const applyDelta = async (
 };
 
 const addEntries = async (
-	req: IPriviligedRequest<IDictionaryEntryData[]>,
+	req: IPriviligedRequest<IDictionaryEntry[]>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -151,7 +144,7 @@ const addEntries = async (
 };
 
 const modifyEntry = async (
-	req: IPriviligedRequest<IDictionaryEntryData>,
+	req: IPriviligedRequest<IDictionaryEntry>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -231,7 +224,7 @@ const fetchEntries = async (
 		userId,
 	});
 
-	let response: IApiResponse<IDictionaryEntryData[]>;
+	let response: IApiResponse<IDictionaryEntry[]>;
 	if (entries.length > 0) {
 		response = {
 			status: ApiStatuses.OK,
@@ -248,8 +241,9 @@ const fetchEntries = async (
 	res.status(200).json(response);
 };
 
+/* 
 const analyzeDocument = async (
-	req: IPriviligedRequest<IDocumentParam>,
+	req: IPriviligedRequest<IEditorDocument>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -262,7 +256,10 @@ const analyzeDocument = async (
 		userId,
 	});
 
-	let response: IApiResponse<IFragementData[]>;
+	let response: IApiResponse<Array<{
+		position: number;
+		entries: Array<IDictionaryEntry>;
+	}>>;
 	if (entries.length > 0) {
 		response = {
 			status: ApiStatuses.OK,
@@ -278,6 +275,7 @@ const analyzeDocument = async (
 
 	res.status(200).json(response);
 };
+*/
 
 export {
 	addEntries,
@@ -287,5 +285,4 @@ export {
 	getEntry,
 	getAll,
 	fetchEntries,
-	analyzeDocument,
 };
