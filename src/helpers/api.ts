@@ -52,6 +52,23 @@ const ApiPaths: { [key: string]: ApiPath } = {
 			},
 		},
 	},
+	document: {
+		path: 'document',
+		endpoints: {
+			save: {
+				path: 'entries',
+				method: 'post',
+			},
+			list: {
+				path: 'entries/list',
+				method: 'post',
+			},
+			getById: {
+				path: 'entries',
+				method: 'get',
+			},
+		},
+	},
 	dict: {
 		path: 'dict',
 		endpoints: {
@@ -151,3 +168,19 @@ export interface IDictionaryFetchParams {
 	limit: number;
 	skip: number;
 }
+
+export interface IListDocumentsParams {
+	sortBy: 'title' | 'createdAt';
+	skip: number;
+	limit: number;
+	excerptLength: number;
+}
+
+export interface IDocumentExcerpt {
+	id: string;
+	title: string;
+	excerpt: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+export type IListDocumentResult = Array<IDocumentExcerpt>;

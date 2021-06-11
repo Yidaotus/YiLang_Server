@@ -12,12 +12,12 @@ const errorHandler = async (
 	let status: ApiStatus = ApiStatuses.ERROR;
 	let message = err.message;
 	if (err) {
-		if (err.name === YiErrors.VALIDATION_ERROR) {
+		if (err?.name === YiErrors.VALIDATION_ERROR) {
 			status = ApiStatuses.INVALIDARGUMENT;
-			message = err.message || 'Invalid parameters!';
+			message = err?.message || 'Invalid parameters!';
 		} else {
 			const errName = err.name;
-			if (errName.indexOf('invalid_grant') > -1) {
+			if (errName && errName.indexOf('invalid_grant') > -1) {
 				res.clearCookie('3rdpartyoauth');
 				status = ApiStatuses.UNAUTHORIZED;
 			}
@@ -28,7 +28,9 @@ const errorHandler = async (
 		};
 		return res.status(400).json(response);
 	} else {
-		next();
+		return res
+			.status(400)
+			.json({ status: ApiStatuses.ERROR, message: 'unknown!' });
 	}
 };
 

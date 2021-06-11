@@ -1,5 +1,5 @@
 import * as UserService from '../services/user.service';
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import {
 	IApiResponse,
 	ApiStatus,
@@ -78,7 +78,7 @@ const login = async (
 };
 
 const authenticate = async (
-	req: IPriviligedRequest<void>,
+	req: IPriviligedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {

@@ -20,14 +20,14 @@ export interface IUser {
 	updatedAt: Date;
 	deletedAt: Date;
 }
-
 type IUserDocument = IUser & Document;
+
 export interface IUserModel extends Model<IUserDocument> {
 	findActiveById(id: string): Promise<IUserDocument>;
 	findActiveByMail(email: string): Promise<IUserDocument>;
 }
 
-const UserSchema = new Schema<IUserDocument, IUserModel>(
+const UserSchema = new Schema<IUserDocument>(
 	{
 		email: { type: String, unique: true, required: true },
 		password: { type: String, required: true },

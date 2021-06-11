@@ -1,9 +1,38 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 import { ApiStatuses, IApiResponse, ITokenData } from '../helpers/api';
 import { IPriviligedRequest, IApiRequest } from '../routes/';
 import User from '../entities/user';
+
+function isRequestPriviliged<T>(req: Request): req is IPriviligedRequest<T> {
+	return (
+		(req as IPriviligedRequest<T>).user !== undefined &&
+		(req as IPriviligedRequest<T>).token !== undefined
+	);
+}
+
+type PrivilegedRequestCallback<T> = (
+	req: IPriviligedRequest<T>,
+	res: Response,
+	next: NextFunction
+) => Promise<void>;
+
+const privilegedRequest = <T>(cb: PrivilegedRequestCallback<T>) => async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	if (isRequestPriviliged<T>(req)) {
+		cb(req, res, next);
+	} else {
+		const response: IApiResponse<void> = {
+			status: ApiStatuses.UNAUTHORIZED,
+			message: 'Unauthorized',
+		};
+		res.status(400).json(response);
+	}
+};
 
 const jwtGuard = async (
 	req: IApiRequest<unknown>,
@@ -36,4 +65,4 @@ const jwtGuard = async (
 	next();
 };
 
-export { jwtGuard };
+export { jwtGuard, isRequestPriviliged, privilegedRequest };

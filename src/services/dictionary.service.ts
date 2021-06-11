@@ -1,6 +1,6 @@
 import DictionaryEntry, {
 	IDictionaryEntryDB,
-} from '../entities/dictionaryEntry';
+} from '../entities/Dictionary';
 import { Schema } from 'mongoose';
 import * as radix from '../helpers/Radix';
 import { DictionaryEntryField } from '../helpers/api';

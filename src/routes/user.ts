@@ -3,7 +3,7 @@ import * as UserController from '../controllers/user.controller';
 import { ApiPaths } from '../helpers/api';
 import Joi from 'joi';
 import { validate, ValidationTarget } from '../middleware/validator';
-import { jwtGuard } from '../middleware/auth';
+import { jwtGuard, privilegedRequest } from '../middleware/auth';
 
 const router = Router();
 const ApiEndpoints = ApiPaths.user.endpoints;
@@ -52,7 +52,7 @@ router[ApiEndpoints.verify.method](
 router[ApiEndpoints.auth.method](
 	`/${ApiEndpoints.auth.path}`,
 	jwtGuard,
-	UserController.authenticate
+	privilegedRequest(UserController.authenticate)
 );
 
 export default router;

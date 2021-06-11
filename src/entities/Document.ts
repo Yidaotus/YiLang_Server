@@ -1,26 +1,22 @@
-import { config } from '../helpers/config';
 import mongoose, { Schema, model, connect } from 'mongoose';
+import { IDocument } from '../Document/Document';
+import {
+	IDialogBlockLine,
+	IDocumentBlock,
+	IImageBlockConfig,
+	ITitleBlockConfig,
+} from '../Document/Block';
+import {
+	Fragment,
+	IFragmentableRange,
+	IFragmentableString,
+	IMarkFragmentData,
+	ISentenceFragmentData,
+	IWordFragmentData,
+} from '../Document/Fragment';
 
-interface BaseBlock {
-	type: 'Title' | 'Paragraph';
-	fid: string;
-}
-
-interface TitleBlock extends BaseBlock {
-	type: 'Title';
-	title: string;
-}
-
-interface ParagraphBlock extends BaseBlock {
-	type: 'Paragraph';
-	paragraph: string;
-}
-
-// 1. Create an interface representing a document in MongoDB.
-interface User {
-	name: string;
-	email: string;
-	blocks: Array<TitleBlock | ParagraphBlock>;
+export interface IDocumentDB extends IDocument {
+	userId: Schema.Types.ObjectId;
 }
 
 const discriminatorOption = {
@@ -28,82 +24,184 @@ const discriminatorOption = {
 	_id: false,
 };
 
-const blockSchema = new Schema<BaseBlock>(
+const FragmentableRangeSchema = new Schema<IFragmentableRange>(
 	{
-		fid: { type: String, required: true },
+		start: { type: Number, required: true },
+		end: { type: Number, required: true },
+	},
+	{ _id: false }
+);
+
+const FragmentSchema = new Schema<Fragment>(
+	{
+		id: { type: String, required: true },
+		range: { type: FragmentableRangeSchema, required: true },
+		fragmented: { type: Boolean, required: false },
+		type: { type: String, required: true },
 	},
 	discriminatorOption
 );
-var BlockModel = model<BaseBlock>('Block', blockSchema);
-/*var TitleBlockModel = BlockModel.discriminator(
-	'Title',
-	new Schema({ title: String }, discriminatorOption)
-);*/
 
-// 2. Create a Schema corresponding to the document interface.
-const docSchema = new Schema<User>(
+const FragmentableSchema = new Schema<IFragmentableString>(
 	{
-		name: { type: String, required: true },
-		email: { type: String, required: true },
-		blocks: [blockSchema],
+		id: { type: String, required: true },
+		root: { type: String, required: true },
+		fragments: { type: [FragmentSchema], required: true },
+		showSpelling: { type: String, required: true },
+		highlightedFragment: { type: String, required: false },
+	},
+	{ _id: false }
+);
+const MarkSchema = new Schema<IMarkFragmentData>(
+	{
+		color: String,
+		comment: { type: String, required: false },
+	},
+	{ _id: false }
+);
+const WordSchema = new Schema<IWordFragmentData>(
+	{
+		dictId: String,
+	},
+	{ _id: false }
+);
+const NestedWordSchema = new Schema<IWordFragmentData>(
+	{
+		id: { type: String, required: true },
+		range: { type: FragmentableRangeSchema, required: true },
+		fragmented: { type: Boolean, required: false },
+		type: { type: String, required: true },
+		data: WordSchema,
+	},
+	{ _id: false }
+);
+const SentenceSchema = new Schema<ISentenceFragmentData>(
+	{
+		translation: String,
+		words: [NestedWordSchema],
+	},
+	discriminatorOption
+);
+
+const fragmentArray = FragmentableSchema.path(
+	'fragments'
+) as mongoose.Schema.Types.DocumentArray;
+
+fragmentArray.discriminator(
+	'Highlight',
+	new Schema({ data: {} }, discriminatorOption)
+);
+
+fragmentArray.discriminator(
+	'Background',
+	new Schema({ data: {} }, discriminatorOption)
+);
+
+fragmentArray.discriminator(
+	'Mark',
+	new Schema(
+		{
+			data: MarkSchema,
+		},
+		discriminatorOption
+	)
+);
+
+fragmentArray.discriminator(
+	'Word',
+	new Schema({ data: WordSchema }, discriminatorOption)
+);
+
+fragmentArray.discriminator(
+	'Sentence',
+	new Schema({ data: SentenceSchema }, discriminatorOption)
+);
+
+fragmentArray.discriminator(
+	'Note',
+	new Schema({ note: String }, discriminatorOption)
+);
+
+const BlockSchema = new Schema<IDocumentBlock>(
+	{
+		id: { type: String, required: true },
+		type: { type: String, required: true },
+		fragmentables: [FragmentableSchema],
+		position: Number,
+	},
+	discriminatorOption
+);
+
+const DocumentSchema = new Schema<IDocumentDB>(
+	{
+		name: { type: String, require: false },
+		createdAt: Date,
+		updatedAt: Date,
+		deletedAt: Date,
+		blocks: [BlockSchema],
+		title: { type: String, required: true },
+		userId: { type: Schema.Types.ObjectId, required: true },
 	},
 	{ timestamps: true }
 );
 
-//var blockArray = docSchema.path('events') as mongoose.Schema.Types.DocumentArray;
-var blockArray = docSchema.path(
+DocumentSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function(_: unknown, ret: IDocumentDB) {
+		delete ret.userId;
+	},
+});
+
+const blockArray = DocumentSchema.path(
 	'blocks'
 ) as mongoose.Schema.Types.DocumentArray;
+
+const TitleConfigSchema = new Schema<ITitleBlockConfig>({
+	size: Number,
+	subtitle: Boolean,
+});
 blockArray.discriminator(
 	'Title',
-	new Schema({ title: String }, discriminatorOption)
+	new Schema(
+		{
+			content: String,
+			config: { type: TitleConfigSchema, required: true },
+		},
+		discriminatorOption
+	)
 );
 blockArray.discriminator(
 	'Paragraph',
-	new Schema({ paragraph: String }, discriminatorOption)
+	new Schema({ content: String }, discriminatorOption)
 );
-// 3. Create a Model.
-const UserModel = model<User>('Docs', docSchema);
-
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-mongoose.set('useUnifiedTopology', true);
-var mongoDB = config.db.connectionString;
-mongoose.connect(mongoDB, { useNewUrlParser: true });
-var db = mongoose.connection;
-
-//Bind connection to error event (to get notification of connection YiErrors)
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', async () => {
-	try {
-		const name = Date.now().toString();
-		const newUser = new UserModel({
-			name,
-			email: 12,
-			blocks: [
-				{
-					fid: 'x',
-					type: 'Title',
-					title: 'Hi T',
-				},
-				{
-					fid: 'x2',
-					type: 'Paragraph',
-					paragraph: 'Hi P',
-				},
-				{
-					fid: 'x',
-					type: 'NOne',
-				},
-			],
-		});
-		await newUser.save();
-		console.log(newUser.blocks[0].type);
-		const foundUser = await UserModel.findOne({ name }).exec();
-		const fUo = foundUser.toObject();
-		console.log(fUo);
-	} catch (e) {
-		console.log(e);
-	}
+const ImageConfigSchema = new Schema<IImageBlockConfig>({
+	alignment: { type: String, enum: ['center', 'left', 'right'] },
 });
+blockArray.discriminator(
+	'Image',
+	new Schema(
+		{
+			source: String,
+			title: { type: String, required: false },
+			config: { type: ImageConfigSchema, required: true },
+		},
+		discriminatorOption
+	)
+);
+
+const DialogBlockLineSchema = new Schema<IDialogBlockLine>(
+	{
+		speaker: { type: String, require: false },
+		speech: { type: String, require: false },
+	},
+	{ _id: false }
+);
+blockArray.discriminator(
+	'Dialog',
+	new Schema({ lines: [DialogBlockLineSchema] }, discriminatorOption)
+);
+
+const DocumentModel = model<IDocumentDB>('Document', DocumentSchema);
+
+export default DocumentModel;

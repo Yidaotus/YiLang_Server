@@ -98,6 +98,7 @@ const fetchSchema = Joi.object({
 router[ApiEndpoints.applyDelta.method](
 	`/${ApiEndpoints.applyDelta.path}`,
 	jwtGuard,
+	validate(deltaSchema, 'body'),
 	DictController.applyDelta
 );
 
@@ -143,7 +144,7 @@ router[ApiEndpoints.fetch.method](
 	DictController.fetchEntries
 );
 
-/* 
+/*
 router[ApiEndpoints.analyze.method](
 	`/${ApiEndpoints.analyze.path}`,
 	jwtGuard,

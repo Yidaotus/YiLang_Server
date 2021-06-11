@@ -1,0 +1,64 @@
+import { Schema } from 'mongoose';
+import { BlockType } from '../Document/Block';
+import { IDocument } from '../Document/Document';
+import DocumentModel from '../entities/Document';
+import { IDocumentExcerpt, IListDocumentsParams } from '../helpers/api';
+
+const generateExcerpt = ({
+	doc,
+	excerptLength,
+	filter,
+}: {
+	doc: IDocument;
+	excerptLength: number;
+	filter?: Array<BlockType>;
+}): string => {
+	let excerpt = '';
+	let excerpted = 0;
+	for (const block of doc.blocks) {
+		if (!filter || filter.indexOf(block.type) !== -1) {
+			for (const fragmentable of block.fragmentables) {
+				if (excerptLength - excerpted < 1) {
+					return excerpt;
+				}
+				const subexcerpt = fragmentable.root
+					.trim()
+					.substr(0, excerptLength - excerpted);
+				excerpt += subexcerpt;
+				excerpted += subexcerpt.length;
+			}
+			excerpt += '\n';
+		}
+	}
+	return excerpt;
+};
+
+const listDocuments = async ({
+	sortBy,
+	limit,
+	skip,
+	excerptLength,
+	userId,
+}: IListDocumentsParams & { userId: Schema.Types.ObjectId }) => {
+	const documents: Array<IDocument> = await DocumentModel.find({ userId })
+		.sort({ [sortBy]: 1 })
+		.limit(limit)
+		.skip(skip)
+		.exec();
+
+	const excerptedDocuments: Array<IDocumentExcerpt> = documents.map(
+		(doc) => ({
+			id: doc.id,
+			title: doc.title,
+			excerpt: generateExcerpt({
+				doc,
+				excerptLength,
+				filter: ['Paragraph', 'Image'],
+			}),
+			createdAt: doc.createdAt,
+			updatedAt: doc.updatedAt,
+		})
+	);
+	return excerptedDocuments;
+};
+export { listDocuments };
