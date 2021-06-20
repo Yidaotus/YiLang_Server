@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongoose';
-import { IDictionaryEntry } from '../Document/Dictionary';
+import { IDictionaryEntry, IDictionaryTag } from '../Document/Dictionary';
 
 export type DictionaryEntryField =
 	| 'word'
@@ -64,6 +64,15 @@ const ApiPaths: { [key: string]: ApiPath } = {
 				method: 'post',
 			},
 			getById: {
+				path: 'entries',
+				method: 'get',
+			},
+		},
+	},
+	tags: {
+		path: 'tags',
+		endpoints: {
+			getAll: {
 				path: 'entries',
 				method: 'get',
 			},
@@ -144,10 +153,10 @@ export interface ITokenData {
 	user: IUserData;
 }
 
-export interface IApiResponse<T> {
+export interface IApiResponse<T = null> {
 	status: ApiStatus;
 	message: string;
-	payload?: T;
+	payload: T;
 }
 
 export interface IDictionaryEntryParams {
@@ -158,8 +167,9 @@ export interface IDictionaryEntryParams {
 
 export interface IDictionaryDelta {
 	removedEntries: Array<string>;
-	updatedEntries: Array<{ [key: string]: IDictionaryEntry }>;
-	addedEntries: Array<{ [key: string]: IDictionaryEntry }>;
+	updatedEntries: Array<IDictionaryEntry>;
+	addedEntries: Array<IDictionaryEntry>;
+	addedTags: Array<IDictionaryTag>;
 }
 
 export interface IDictionaryFetchParams {

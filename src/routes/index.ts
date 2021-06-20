@@ -2,7 +2,8 @@ import express from 'express';
 import UserRouter from './user';
 import DictRouter from './dictionary';
 import DocumentRouter from './document';
-import { ITokenData, IUserData, ApiPaths } from '../helpers/api';
+import TagsRouter from './tags';
+import { ITokenData, ApiPaths } from '../helpers/api';
 import { IUser } from '../entities/user';
 
 const router = express.Router();
@@ -19,5 +20,6 @@ export interface IPriviligedRequest<T = void> extends IApiRequest<T> {
 router.use(`/${ApiPaths.user.path}`, UserRouter);
 router.use(`/${ApiPaths.dict.path}`, DictRouter);
 router.use(`/${ApiPaths.document.path}`, DocumentRouter);
+router.use(`/${ApiPaths.tags.path}`, TagsRouter);
 
 export default router;

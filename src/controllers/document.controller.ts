@@ -7,7 +7,7 @@ import {
 	IListDocumentResult,
 	IListDocumentsParams,
 } from '../helpers/api';
-import DocumentModel from '../entities/Document';
+import DocumentModel, { IDocumentDB } from '../entities/Document';
 import { IPriviligedRequest } from '../routes';
 import * as DocumentService from '../services/document.service';
 
@@ -25,9 +25,10 @@ const saveDocument = async (
 
 		await DocumentModel.create(newDocumentForUser);
 
-		const response: IApiResponse<void> = {
+		const response: IApiResponse = {
 			status: ApiStatuses.OK,
 			message: 'Document saved successful!',
+			payload: null,
 		};
 		res.status(200).json(response);
 	} catch (err) {
@@ -62,6 +63,7 @@ const listDocuments = async (
 			response = {
 				status: ApiStatuses.OK,
 				message: 'No Document found!',
+				payload: [],
 			};
 		}
 
@@ -79,11 +81,12 @@ const getDocument = async (
 	const id = req.params.id as string;
 	try {
 		//await UserService.register(userDetails, verificationUrl);
-		const document: IDocument = await DocumentModel.findOne({
+		const document = await DocumentModel.findOne({
 			_id: id,
+			userId: req.user.id,
 		}).exec();
 
-		let response: IApiResponse<IDocument>;
+		let response: IApiResponse<IDocument | null>;
 		if (document) {
 			response = {
 				status: ApiStatuses.OK,
@@ -94,6 +97,7 @@ const getDocument = async (
 			response = {
 				status: ApiStatuses.OK,
 				message: 'No Document found!',
+				payload: null,
 			};
 		}
 

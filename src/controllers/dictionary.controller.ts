@@ -6,6 +6,7 @@ import {
 	IDictionaryFetchParams,
 } from '../helpers/api';
 import DictionaryEntry from '../entities/Dictionary';
+import DictionaryTag from '../entities/Tag';
 import * as DictionaryService from '../services/dictionary.service';
 import { IDictionaryEntry } from '../Document/Dictionary';
 import { isRequestPriviliged } from '../middleware/auth';
@@ -34,6 +35,7 @@ const getAll = async (
 				response = {
 					status: ApiStatuses.OK,
 					message: 'No entries found!',
+					payload: [],
 				};
 			}
 
@@ -70,6 +72,7 @@ const getEntry = async (
 				response = {
 					status: ApiStatuses.OK,
 					message: 'No entries found!',
+					payload: [],
 				};
 			}
 
@@ -86,40 +89,56 @@ const applyDelta = async (
 	next: NextFunction
 ): Promise<void> => {
 	if (isRequestPriviliged<IDictionaryDelta>(req)) {
-		const { removedEntries, updatedEntries, addedEntries } = req.body;
+		const {
+			removedEntries,
+			updatedEntries,
+			addedEntries,
+			addedTags,
+		} = req.body;
+
+		// const session = await DictionaryTag.startSession();
+		// session.startTransaction();
 		try {
 			const removedUserEntries = {
-				entryId: { $in: removedEntries },
+				id: { $in: removedEntries },
 				userId: req.user.id,
 			};
 			await DictionaryEntry.deleteMany(removedUserEntries);
 
 			const addedUserEntries = addedEntries.map((entry) => {
-				const entryId = Object.keys(entry)[0];
-				const obEntry = Object.values(entry)[0];
 				return {
-					entryId,
-					...obEntry,
+					...entry,
 					userId: req.user.id,
 				};
 			});
 			await DictionaryEntry.create(addedUserEntries);
 
 			await updatedEntries.map(async (entry) => {
-				const entryId = Object.keys(entry)[0];
-				const obEntry = Object.values(entry)[0];
 				await DictionaryEntry.updateOne(
-					{ entryId, userId: req.user.id },
-					{ ...obEntry }
+					{ id: entry.id, userId: req.user.id },
+					{ ...entry }
 				);
 			});
 
-			const response: IApiResponse<void> = {
+			const addedUserTags = addedTags.map((tag) => {
+				return {
+					...tag,
+					userId: req.user.id,
+				};
+			});
+			await DictionaryTag.create(addedUserTags);
+
+			// session.commitTransaction();
+			// session.endSession();
+			const response: IApiResponse = {
 				status: ApiStatuses.OK,
 				message: 'Entrie(s) added successful!',
+				payload: null,
 			};
 			res.status(200).json(response);
 		} catch (err) {
+			// session.abortTransaction();
+			// session.endSession();
 			next(err);
 		}
 	}
@@ -140,9 +159,10 @@ const addEntries = async (
 
 			await DictionaryEntry.create(entries);
 
-			const response: IApiResponse<void> = {
+			const response: IApiResponse = {
 				status: ApiStatuses.OK,
 				message: 'Entrie(s) added successful!',
+				payload: null,
 			};
 			res.status(200).json(response);
 		} catch (err) {
@@ -164,7 +184,7 @@ const modifyEntry = async (
 				key: oldEntry.key,
 			}).exec();
 
-			let response: IApiResponse<void>;
+			let response: IApiResponse;
 
 			if (entry) {
 				entry.translations = oldEntry.translations;
@@ -172,11 +192,13 @@ const modifyEntry = async (
 				response = {
 					status: ApiStatuses.OK,
 					message: 'Word changed Successfull!',
+					payload: null,
 				};
 			} else {
 				response = {
 					status: ApiStatuses.OK,
 					message: 'Word not found!',
+					payload: null,
 				};
 			}
 			res.status(200).json(response);
@@ -199,18 +221,20 @@ const deleteEntry = async (
 				word: key,
 			}).exec();
 
-			let response: IApiResponse<void>;
+			let response: IApiResponse;
 
 			if (entry) {
 				await entry.remove();
 				response = {
 					status: ApiStatuses.OK,
 					message: 'Word changed Successfull!',
+					payload: null,
 				};
 			} else {
 				response = {
 					status: ApiStatuses.OK,
 					message: 'Word not found!',
+					payload: null,
 				};
 			}
 			res.status(200).json(response);
@@ -226,7 +250,7 @@ const fetchEntries = async (
 	next: NextFunction
 ): Promise<void> => {
 	if (isRequestPriviliged<IDictionaryFetchParams>(req)) {
-		const { sortBy, lang, limit = 10, skip = 0 } = req.body;
+		const { sortBy, lang, limit = 0, skip = 0 } = req.body;
 		const userId = req.user.id;
 
 		const entries = await DictionaryService.fetch({
@@ -248,6 +272,7 @@ const fetchEntries = async (
 			response = {
 				status: ApiStatuses.OK,
 				message: 'No entries found!',
+				payload: [],
 			};
 		}
 

@@ -1,9 +1,11 @@
 import mongoose, { Schema, model, connect } from 'mongoose';
 import { IDocument } from '../Document/Document';
 import {
+	DocumentBlock,
 	IDialogBlockLine,
 	IDocumentBlock,
 	IImageBlockConfig,
+	IListBlockConfig,
 	ITitleBlockConfig,
 } from '../Document/Block';
 import {
@@ -14,6 +16,7 @@ import {
 	ISentenceFragmentData,
 	IWordFragmentData,
 } from '../Document/Fragment';
+import { IRenderMapEntry } from '../Document/RenderMap';
 
 export interface IDocumentDB extends IDocument {
 	userId: Schema.Types.ObjectId;
@@ -122,7 +125,7 @@ fragmentArray.discriminator(
 	new Schema({ note: String }, discriminatorOption)
 );
 
-const BlockSchema = new Schema<IDocumentBlock>(
+const BlockSchema = new Schema<DocumentBlock>(
 	{
 		id: { type: String, required: true },
 		type: { type: String, required: true },
@@ -130,6 +133,15 @@ const BlockSchema = new Schema<IDocumentBlock>(
 		position: Number,
 	},
 	discriminatorOption
+);
+
+const RenderMapSchema = new Schema<IRenderMapEntry>(
+	{
+		type: String,
+		id: String,
+		scale: Number,
+	},
+	{ _id: false }
 );
 
 const DocumentSchema = new Schema<IDocumentDB>(
@@ -141,6 +153,7 @@ const DocumentSchema = new Schema<IDocumentDB>(
 		blocks: [BlockSchema],
 		title: { type: String, required: true },
 		userId: { type: Schema.Types.ObjectId, required: true },
+		renderMap: { type: [[RenderMapSchema]], required: true },
 	},
 	{ timestamps: true }
 );
@@ -200,6 +213,20 @@ const DialogBlockLineSchema = new Schema<IDialogBlockLine>(
 blockArray.discriminator(
 	'Dialog',
 	new Schema({ lines: [DialogBlockLineSchema] }, discriminatorOption)
+);
+
+const ListConfigSchema = new Schema<IListBlockConfig>({
+	style: { type: String, enum: ['ordered', 'unordered'] },
+});
+blockArray.discriminator(
+	'List',
+	new Schema(
+		{
+			items: [String],
+			config: { type: ListConfigSchema, required: true },
+		},
+		discriminatorOption
+	)
 );
 
 const DocumentModel = model<IDocumentDB>('Document', DocumentSchema);

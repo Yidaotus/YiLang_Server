@@ -24,9 +24,10 @@ const register = async (
 
 	try {
 		await UserService.register(userDetails, verificationUrl);
-		const response: IApiResponse<void> = {
+		const response: IApiResponse = {
 			status: ApiStatuses.OK,
 			message: 'Registration Successfull!',
+			payload: null,
 		};
 		res.status(200).json(response);
 	} catch (err) {
@@ -44,9 +45,10 @@ const verify = async (
 	try {
 		await UserService.verify(token);
 
-		const response: IApiResponse<void> = {
+		const response: IApiResponse = {
 			status: ApiStatuses.OK,
 			message: 'Account verified!',
+			payload: null,
 		};
 		res.status(200).json(response);
 	} catch (err) {

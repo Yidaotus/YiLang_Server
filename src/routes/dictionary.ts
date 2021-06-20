@@ -32,6 +32,7 @@ const getEntriesSchema = Joi.object({
 });
 
 const entrySchema = Joi.object({
+	id: Joi.string().required(),
 	key: Joi.string().required(),
 	translations: Joi.array()
 		.items(Joi.string())
@@ -42,43 +43,49 @@ const entrySchema = Joi.object({
 		.max(5),
 	sourceDocument: Joi.string().optional(),
 	firstSeen: Joi.string().optional(),
-	tags: Joi.array().items(
-		Joi.object({
-			name: Joi.string(),
-			color: Joi.string().optional(),
-			comment: Joi.string().optional(),
-		})
-	),
-	comment: Joi.string().optional(),
-	spelling: Joi.string().optional(),
+	tags: Joi.array().items(Joi.string()),
+	comment: Joi.string()
+		.optional()
+		.allow(''),
+	spelling: Joi.string()
+		.optional()
+		.allow(''),
 	variations: Joi.array().items(
 		Joi.object({
 			key: Joi.string().required(),
-			tags: Joi.array().items(
-				Joi.object({
-					name: Joi.string(),
-					color: Joi.string()
-						.optional()
-						.allow(''),
-					comment: Joi.string()
-						.optional()
-						.allow(''),
-				})
-			),
 			comment: Joi.string()
 				.optional()
 				.allow(''),
 			spelling: Joi.string()
 				.optional()
 				.allow(''),
+			tags: Joi.array().items(Joi.string()),
 		})
 	),
 });
 
+// @TODO Only use the one from tags route!
+const tagSchema = Joi.object({
+	id: Joi.string().required(),
+	name: Joi.string(),
+	lang: Joi.string()
+		.required()
+		.min(2)
+		.max(5),
+	color: Joi.string()
+		.optional()
+		.allow(''),
+	comment: Joi.string()
+		.optional()
+		.allow(''),
+	grammarPoint: Joi.object().optional(),
+});
+
 const deltaSchema = Joi.object({
 	removedEntries: Joi.array().items(Joi.string()),
-	updatedEntries: Joi.array().items(Joi.object().pattern(/^/, entrySchema)),
-	addedEntries: Joi.array().items(Joi.object().pattern(/^/, entrySchema)),
+	updatedEntries: Joi.array().items(entrySchema),
+	addedEntries: Joi.array().items(entrySchema),
+	addedTags: Joi.array().items(tagSchema),
 });
 
 const fetchSchema = Joi.object({
