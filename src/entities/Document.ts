@@ -154,6 +154,7 @@ const DocumentSchema = new Schema<IDocumentDB>(
 		title: { type: String, required: true },
 		userId: { type: Schema.Types.ObjectId, required: true },
 		renderMap: { type: [[RenderMapSchema]], required: true },
+		id: { type: String, require: true },
 	},
 	{ timestamps: true }
 );

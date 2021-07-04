@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { BlockType } from '../Document/Block';
 import { IDocument } from '../Document/Document';
+import { UUID } from '../Document/UUID';
 import DocumentModel from '../entities/Document';
 import { IDocumentExcerpt, IListDocumentsParams } from '../helpers/api';
 
@@ -40,11 +41,13 @@ const listDocuments = async ({
 	excerptLength,
 	userId,
 }: IListDocumentsParams & { userId: Schema.Types.ObjectId }) => {
+	// @TODO LANG!
 	const documents: Array<IDocument> = await DocumentModel.find({ userId })
 		.sort({ [sortBy]: 1 })
 		.limit(limit)
 		.skip(skip)
 		.exec();
+	const total = await DocumentModel.count({ userId });
 
 	const excerptedDocuments: Array<IDocumentExcerpt> = documents.map(
 		(doc) => ({
@@ -59,6 +62,35 @@ const listDocuments = async ({
 			updatedAt: doc.updatedAt,
 		})
 	);
-	return excerptedDocuments;
+	return { total, excerpts: excerptedDocuments };
 };
-export { listDocuments };
+
+const get = async ({
+	userId,
+	id,
+}: {
+	userId: Schema.Types.ObjectId;
+	id: UUID;
+}) => {
+	const document = await DocumentModel.findOne({
+		id,
+		userId,
+	}).exec();
+	return document;
+};
+
+const saveOrUpdate = async ({
+	userId,
+	id,
+	newDocument,
+}: {
+	userId: Schema.Types.ObjectId;
+	id: UUID;
+	newDocument: IDocument;
+}) => {
+	await DocumentModel.updateOne({ userId, id: newDocument.id }, newDocument, {
+		upsert: true,
+		runValidators: true,
+	}).exec();
+};
+export { listDocuments, get, saveOrUpdate };

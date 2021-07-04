@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import * as DictController from '../controllers/dictionary.controller';
 import { ApiPaths } from '../helpers/api';
 import Joi from 'joi';
 import { jwtGuard, privilegedRequest } from '../middleware/auth';

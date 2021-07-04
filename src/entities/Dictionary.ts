@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
 import { IDictionaryEntry } from '../Document/Dictionary';
+import { IDocumentLink } from '../Document/Document';
 
 export interface IDictionaryEntryDB extends IDictionaryEntry {
 	_id: ObjectId;
@@ -14,6 +15,15 @@ type IDictionaryEntryDocument = IDictionaryEntryDB & Document;
 export interface IDictionaryEntryModel
 	extends Model<IDictionaryEntryDocument> {}
 
+const DocumentLinkSchema = new Schema<IDocumentLink>(
+	{
+		documentId: { type: String, required: true },
+		fragmentableId: { type: String, required: true },
+		offset: { type: Number, required: true },
+	},
+	{ _id: false }
+);
+
 const DictionaryEntrySchema = new Schema<
 	IDictionaryEntryDocument,
 	IDictionaryEntryModel
@@ -25,6 +35,7 @@ const DictionaryEntrySchema = new Schema<
 		lang: { type: String, required: true, minlength: 2, maxlength: 5 },
 		tags: { type: Schema.Types.Array, required: true },
 		variations: { type: Schema.Types.Array, required: false },
+		firstSeen: { type: DocumentLinkSchema, required: false },
 		comment: { type: String, required: false },
 		spelling: { type: String, required: false },
 		userId: { type: Schema.Types.ObjectId, required: true },

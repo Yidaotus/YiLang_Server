@@ -1,264 +1,68 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import {
 	IApiResponse,
 	ApiStatuses,
 	IDictionaryDelta,
 	IDictionaryFetchParams,
+	IListDictionaryParams,
+	IListDictionaryResult,
+	IGetManyDictEntriesPrams,
 } from '../helpers/api';
-import DictionaryEntry from '../entities/Dictionary';
-import DictionaryTag from '../entities/Tag';
 import * as DictionaryService from '../services/dictionary.service';
 import { IDictionaryEntry } from '../Document/Dictionary';
-import { isRequestPriviliged } from '../middleware/auth';
+import { IPriviligedRequest } from '../routes';
+import { UUID } from '../Document/UUID';
 
-const getAll = async (
-	req: Request,
+const list = async (
+	req: IPriviligedRequest<IListDictionaryParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	if (isRequestPriviliged(req)) {
-		const lang = req.params.lang as string;
-		try {
-			//await UserService.register(userDetails, verificationUrl);
-			const entries: IDictionaryEntry[] = await DictionaryEntry.find({
-				lang,
-			}).exec();
-
-			let response: IApiResponse<IDictionaryEntry[]>;
-			if (entries.length > 0) {
-				response = {
-					status: ApiStatuses.OK,
-					message: 'Entries found!',
-					payload: entries,
-				};
-			} else {
-				response = {
-					status: ApiStatuses.OK,
-					message: 'No entries found!',
-					payload: [],
-				};
-			}
-
-			res.status(200).json(response);
-		} catch (err) {
-			next(err);
-		}
-	}
-};
-
-const getEntry = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	if (isRequestPriviliged(req)) {
-		const key = req.params.key as string;
-		const lang = req.params.lang as string;
-		try {
-			//await UserService.register(userDetails, verificationUrl);
-			const entry: IDictionaryEntry[] = await DictionaryEntry.find({
-				word: new RegExp(`^${key}`, 'g'),
-				lang,
-			}).exec();
-
-			let response: IApiResponse<IDictionaryEntry[]>;
-			if (entry.length > 0) {
-				response = {
-					status: ApiStatuses.OK,
-					message: 'Entries found!',
-					payload: entry,
-				};
-			} else {
-				response = {
-					status: ApiStatuses.OK,
-					message: 'No entries found!',
-					payload: [],
-				};
-			}
-
-			res.status(200).json(response);
-		} catch (err) {
-			next(err);
-		}
-	}
-};
-
-const applyDelta = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	if (isRequestPriviliged<IDictionaryDelta>(req)) {
-		const {
-			removedEntries,
-			updatedEntries,
-			addedEntries,
-			addedTags,
-		} = req.body;
-
-		// const session = await DictionaryTag.startSession();
-		// session.startTransaction();
-		try {
-			const removedUserEntries = {
-				id: { $in: removedEntries },
-				userId: req.user.id,
-			};
-			await DictionaryEntry.deleteMany(removedUserEntries);
-
-			const addedUserEntries = addedEntries.map((entry) => {
-				return {
-					...entry,
-					userId: req.user.id,
-				};
-			});
-			await DictionaryEntry.create(addedUserEntries);
-
-			await updatedEntries.map(async (entry) => {
-				await DictionaryEntry.updateOne(
-					{ id: entry.id, userId: req.user.id },
-					{ ...entry }
-				);
-			});
-
-			const addedUserTags = addedTags.map((tag) => {
-				return {
-					...tag,
-					userId: req.user.id,
-				};
-			});
-			await DictionaryTag.create(addedUserTags);
-
-			// session.commitTransaction();
-			// session.endSession();
-			const response: IApiResponse = {
-				status: ApiStatuses.OK,
-				message: 'Entrie(s) added successful!',
-				payload: null,
-			};
-			res.status(200).json(response);
-		} catch (err) {
-			// session.abortTransaction();
-			// session.endSession();
-			next(err);
-		}
-	}
-};
-
-const addEntries = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	if (isRequestPriviliged<Array<IDictionaryEntry>>(req)) {
-		const newEntries = req.body;
-		try {
-			const entries = newEntries.map((entry) => ({
-				...entry,
-				userId: req.user.id,
-			}));
-
-			await DictionaryEntry.create(entries);
-
-			const response: IApiResponse = {
-				status: ApiStatuses.OK,
-				message: 'Entrie(s) added successful!',
-				payload: null,
-			};
-			res.status(200).json(response);
-		} catch (err) {
-			next(err);
-		}
-	}
-};
-
-const modifyEntry = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	if (isRequestPriviliged<IDictionaryEntry>(req)) {
-		const oldEntry = req.body;
-		try {
-			//await UserService.register(userDetails, verificationUrl);
-			const entry = await DictionaryEntry.findOne({
-				key: oldEntry.key,
-			}).exec();
-
-			let response: IApiResponse;
-
-			if (entry) {
-				entry.translations = oldEntry.translations;
-				await entry.save();
-				response = {
-					status: ApiStatuses.OK,
-					message: 'Word changed Successfull!',
-					payload: null,
-				};
-			} else {
-				response = {
-					status: ApiStatuses.OK,
-					message: 'Word not found!',
-					payload: null,
-				};
-			}
-			res.status(200).json(response);
-		} catch (err) {
-			next(err);
-		}
-	}
-};
-
-const deleteEntry = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	if (isRequestPriviliged(req)) {
-		const key = req.params.key as string;
-		try {
-			//await UserService.register(userDetails, verificationUrl);
-			const entry = await DictionaryEntry.findOne({
-				word: key,
-			}).exec();
-
-			let response: IApiResponse;
-
-			if (entry) {
-				await entry.remove();
-				response = {
-					status: ApiStatuses.OK,
-					message: 'Word changed Successfull!',
-					payload: null,
-				};
-			} else {
-				response = {
-					status: ApiStatuses.OK,
-					message: 'Word not found!',
-					payload: null,
-				};
-			}
-			res.status(200).json(response);
-		} catch (err) {
-			next(err);
-		}
-	}
-};
-
-const fetchEntries = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	if (isRequestPriviliged<IDictionaryFetchParams>(req)) {
-		const { sortBy, lang, limit = 0, skip = 0 } = req.body;
+	const { filter, sortBy, skip, limit, excerptLength, lang } = req.body;
+	try {
 		const userId = req.user.id;
-
-		const entries = await DictionaryService.fetch({
+		const listing = await DictionaryService.listEntries({
 			sortBy,
-			lang,
-			limit,
 			skip,
+			limit,
+			lang,
+			excerptLength,
 			userId,
+			filter,
+		});
+
+		let response: IApiResponse<IListDictionaryResult>;
+		if (listing && listing.entries.length > 0) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Entries found!',
+				payload: listing,
+			};
+		} else {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'No Document found!',
+				payload: { total: 0, entries: [] },
+			};
+		}
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const getMany = async (
+	req: IPriviligedRequest<IGetManyDictEntriesPrams>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	const { ids } = req.body;
+	try {
+		const entries = await DictionaryService.get({
+			userId,
+			ids: ids as Array<UUID>,
 		});
 
 		let response: IApiResponse<IDictionaryEntry[]>;
@@ -277,7 +81,225 @@ const fetchEntries = async (
 		}
 
 		res.status(200).json(response);
+	} catch (err) {
+		next(err);
 	}
+};
+
+const getAll = async (
+	req: IPriviligedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	const lang = req.params.lang as string;
+	try {
+		const entries = await DictionaryService.find({
+			userId,
+			lang,
+			searchTerm: '',
+		});
+
+		let response: IApiResponse<IDictionaryEntry[]>;
+		if (entries.length > 0) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Entries found!',
+				payload: entries,
+			};
+		} else {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'No entries found!',
+				payload: [],
+			};
+		}
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const searchEntries = async (
+	req: IPriviligedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const searchTerm = req.params.key as string;
+	const lang = req.params.lang as string;
+	const userId = req.user.id;
+
+	try {
+		const entries = await DictionaryService.find({
+			userId,
+			lang,
+			searchTerm,
+		});
+
+		let response: IApiResponse<Array<IDictionaryEntry>>;
+		if (entries && entries.length > 0) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Entries found!',
+				payload: entries,
+			};
+		} else {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'No entries found!',
+				payload: null,
+			};
+		}
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const getEntry = async (
+	req: IPriviligedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const id = req.params.id as UUID;
+	const lang = req.params.lang as string;
+	const userId = req.user.id;
+	try {
+		const { entry, linkExcerpt } = await DictionaryService.getWithExcerpt({
+			userId,
+			id,
+		});
+
+		let response: IApiResponse<IDictionaryEntry & {
+			linkExcerpt: string;
+		}>;
+		if (entry) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Entries found!',
+				payload: { ...entry, linkExcerpt },
+			};
+		} else {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'No entries found!',
+				payload: null,
+			};
+		}
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const applyDelta = async (
+	req: IPriviligedRequest<IDictionaryDelta>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const { removedEntries, updatedEntries, addedEntries } = req.body;
+
+	const userId = req.user.id;
+	try {
+		await DictionaryService.remove({ userId, ids: removedEntries });
+		await DictionaryService.create({ userId, entries: addedEntries });
+
+		for (const updatedEntry of updatedEntries) {
+			await DictionaryService.update({
+				userId,
+				id: updatedEntry.id,
+				newEntry: updatedEntry,
+			});
+		}
+
+		const response: IApiResponse = {
+			status: ApiStatuses.OK,
+			message: 'Entrie(s) added successful!',
+			payload: null,
+		};
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const addEntries = async (
+	req: IPriviligedRequest<Array<IDictionaryEntry>>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const entries = req.body;
+	const userId = req.user.id;
+	try {
+		DictionaryService.create({ userId, entries });
+
+		const response: IApiResponse = {
+			status: ApiStatuses.OK,
+			message: 'Entrie(s) added successful!',
+			payload: null,
+		};
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const deleteEntry = async (
+	req: IPriviligedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const key = req.params.key as string;
+	const userId = req.user.id;
+	try {
+		await DictionaryService.remove({ userId, ids: [key] });
+		let response: IApiResponse;
+
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Word changed Successfull!',
+			payload: null,
+		};
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const fetchEntries = async (
+	req: IPriviligedRequest<IDictionaryFetchParams>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const { sortBy, lang, limit = 0, skip = 0 } = req.body;
+	const userId = req.user.id;
+
+	const entries = await DictionaryService.fetch({
+		sortBy,
+		lang,
+		limit,
+		skip,
+		userId,
+	});
+
+	let response: IApiResponse<IDictionaryEntry[]>;
+	if (entries.length > 0) {
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Entries found!',
+			payload: entries,
+		};
+	} else {
+		response = {
+			status: ApiStatuses.OK,
+			message: 'No entries found!',
+			payload: [],
+		};
+	}
+
+	res.status(200).json(response);
 };
 
 /* 
@@ -318,10 +340,12 @@ const analyzeDocument = async (
 
 export {
 	addEntries,
-	modifyEntry,
 	deleteEntry,
 	applyDelta,
 	getEntry,
+	searchEntries,
+	list,
 	getAll,
 	fetchEntries,
+	getMany,
 };

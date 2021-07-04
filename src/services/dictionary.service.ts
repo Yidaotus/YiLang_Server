@@ -1,10 +1,11 @@
-import DictionaryEntry, {
-	IDictionaryEntryDB,
-} from '../entities/Dictionary';
-import { Schema } from 'mongoose';
+import DictionaryEntry, { IDictionaryEntryDB } from '../entities/Dictionary';
+import { Query, Schema } from 'mongoose';
 import * as radix from '../helpers/Radix';
-import { DictionaryEntryField } from '../helpers/api';
+import { DictionaryEntryField, IListDictionaryParams } from '../helpers/api';
 import { IDictionaryEntry } from '../Document/Dictionary';
+import { addEntries } from '../controllers/dictionary.controller';
+import { getUUID, UUID } from '../Document/UUID';
+import DocumentModel from '../entities/Document';
 
 const fetch = async ({
 	sortBy,
@@ -29,6 +30,47 @@ const fetch = async ({
 		.exec();
 
 	return entries;
+};
+
+const listEntries = async ({
+	sortBy,
+	limit,
+	skip,
+	excerptLength,
+	lang,
+	userId,
+	filter,
+}: IListDictionaryParams & { userId: Schema.Types.ObjectId }) => {
+	let entriesQueryCreator = DictionaryEntry.find({
+		userId,
+		lang,
+	});
+
+	if (sortBy) {
+		entriesQueryCreator = entriesQueryCreator.sort({
+			[sortBy.key]: sortBy.order === 'ascend' ? 1 : -1,
+		});
+	}
+	let isFilterQuery = false;
+	if (filter && Object.keys(filter).length > 0) {
+		for (const [key, filt] of Object.entries(filter)) {
+			if (filt) {
+				entriesQueryCreator = entriesQueryCreator.in(
+					key,
+					filt.map((fentry) => new RegExp(fentry, 'g'))
+				);
+				isFilterQuery = true;
+			}
+		}
+	}
+
+	const entriesQuery = entriesQueryCreator.toConstructor();
+	const total = await new entriesQuery().count();
+	const entries = await new entriesQuery()
+		.limit(limit)
+		.skip(skip)
+		.exec();
+	return { total, entries };
 };
 
 const findOccurances = async ({
@@ -74,4 +116,116 @@ const findOccurances = async ({
 
 	return occurances;
 };
-export { fetch, findOccurances };
+
+const remove = async ({
+	userId,
+	ids,
+}: {
+	userId: Schema.Types.ObjectId;
+	ids: Array<string>;
+}) => {
+	await DictionaryEntry.deleteMany({
+		userId,
+	})
+		.in('id', ids)
+		.exec();
+};
+
+const create = async ({
+	userId,
+	entries,
+}: {
+	userId: Schema.Types.ObjectId;
+	entries: Array<IDictionaryEntry>;
+}) => {
+	const entriesToInsert = entries.map((entry) => ({
+		...entry,
+		userId,
+	}));
+
+	await DictionaryEntry.create(entriesToInsert);
+};
+
+const update = async ({
+	userId,
+	id,
+	newEntry,
+}: {
+	userId: Schema.Types.ObjectId;
+	id: UUID;
+	newEntry: IDictionaryEntry;
+}) => {
+	await DictionaryEntry.updateOne({ id: id, userId }, { ...newEntry });
+};
+
+const get = async ({
+	userId,
+	ids,
+}: {
+	userId: Schema.Types.ObjectId;
+	ids: Array<UUID>;
+}): Promise<Array<IDictionaryEntry>> => {
+	const entries = await DictionaryEntry.find({
+		id: ids,
+		userId,
+	}).exec();
+	return entries;
+};
+
+const getWithExcerpt = async ({
+	userId,
+	id,
+}: {
+	userId: Schema.Types.ObjectId;
+	id: UUID;
+}) => {
+	const entry: IDictionaryEntry = await DictionaryEntry.findOne({
+		id,
+		userId,
+	}).exec();
+	const docSource = await DocumentModel.findOne(
+		{
+			id: entry.firstSeen.documentId,
+			'blocks.fragmentables.id': entry.firstSeen.fragmentableId,
+			userId,
+		},
+		{ 'blocks.fragmentables.$.root': 1 }
+	).exec();
+	let linkExcerpt;
+	if (docSource) {
+		const root = docSource.blocks[0].fragmentables[0].root;
+		if (root) {
+			linkExcerpt = root.substr(entry.firstSeen.offset - 20, 40);
+		}
+	}
+	return { entry, linkExcerpt };
+};
+
+const find = async ({
+	userId,
+	lang,
+	searchTerm,
+}: {
+	userId: Schema.Types.ObjectId;
+	lang: string;
+	searchTerm: string;
+}) => {
+	const entries: IDictionaryEntry[] = await DictionaryEntry.find({
+		key: new RegExp(`.*${searchTerm}.*`, 'g'),
+		lang,
+		userId,
+	}).exec();
+	return entries;
+};
+
+export {
+	fetch,
+	findOccurances,
+	listEntries,
+	remove,
+	create,
+	update,
+	getWithExcerpt,
+	get,
+	find,
+};

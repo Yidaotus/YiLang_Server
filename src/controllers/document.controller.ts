@@ -3,27 +3,27 @@ import { IDocument } from '../Document/Document';
 import {
 	IApiResponse,
 	ApiStatuses,
-	IDocumentExcerpt,
 	IListDocumentResult,
 	IListDocumentsParams,
 } from '../helpers/api';
-import DocumentModel, { IDocumentDB } from '../entities/Document';
 import { IPriviligedRequest } from '../routes';
 import * as DocumentService from '../services/document.service';
+import { UUID } from '../Document/UUID';
 
-const saveDocument = async (
+const saveOrUpdateDocument = async (
 	req: IPriviligedRequest<IDocument>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
 	const newDocument = req.body;
-	try {
-		const newDocumentForUser = {
-			...newDocument,
-			userId: req.user.id,
-		};
+	const userId = req.user.id;
 
-		await DocumentModel.create(newDocumentForUser);
+	try {
+		await DocumentService.saveOrUpdate({
+			userId,
+			id: newDocument.id,
+			newDocument,
+		});
 
 		const response: IApiResponse = {
 			status: ApiStatuses.OK,
@@ -53,7 +53,7 @@ const listDocuments = async (
 		});
 
 		let response: IApiResponse<IListDocumentResult>;
-		if (excerptedDocuments && excerptedDocuments.length > 0) {
+		if (excerptedDocuments && excerptedDocuments.excerpts.length > 0) {
 			response = {
 				status: ApiStatuses.OK,
 				message: 'Document found!',
@@ -63,7 +63,7 @@ const listDocuments = async (
 			response = {
 				status: ApiStatuses.OK,
 				message: 'No Document found!',
-				payload: [],
+				payload: { total: 0, excerpts: [] },
 			};
 		}
 
@@ -78,13 +78,14 @@ const getDocument = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id as string;
+	const id = req.params.id as UUID;
+	const userId = req.user.id;
 	try {
 		//await UserService.register(userDetails, verificationUrl);
-		const document = await DocumentModel.findOne({
-			_id: id,
-			userId: req.user.id,
-		}).exec();
+		const document = await DocumentService.get({
+			id,
+			userId,
+		});
 
 		let response: IApiResponse<IDocument | null>;
 		if (document) {
@@ -107,4 +108,4 @@ const getDocument = async (
 	}
 };
 
-export { saveDocument, getDocument, listDocuments };
+export { saveOrUpdateDocument as saveDocument, getDocument, listDocuments };

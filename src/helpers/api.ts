@@ -72,15 +72,27 @@ const ApiPaths: { [key: string]: ApiPath } = {
 	tags: {
 		path: 'tags',
 		endpoints: {
+			getMany: {
+				path: 'retrieve',
+				method: 'post',
+			},
 			getAll: {
 				path: 'entries',
 				method: 'get',
+			},
+			applyDelta: {
+				path: 'delta',
+				method: 'post',
 			},
 		},
 	},
 	dict: {
 		path: 'dict',
 		endpoints: {
+			getMany: {
+				path: 'retrieve',
+				method: 'post',
+			},
 			add: {
 				path: 'entries',
 				method: 'post',
@@ -99,6 +111,14 @@ const ApiPaths: { [key: string]: ApiPath } = {
 			},
 			getAll: {
 				path: 'entries',
+				method: 'get',
+			},
+			list: {
+				path: 'list',
+				method: 'post',
+			},
+			search: {
+				path: 'search',
 				method: 'get',
 			},
 			get: {
@@ -169,6 +189,11 @@ export interface IDictionaryDelta {
 	removedEntries: Array<string>;
 	updatedEntries: Array<IDictionaryEntry>;
 	addedEntries: Array<IDictionaryEntry>;
+}
+
+export interface ITagDelta {
+	removedTags: Array<string>;
+	updatedTags: Array<IDictionaryTag>;
 	addedTags: Array<IDictionaryTag>;
 }
 
@@ -179,11 +204,41 @@ export interface IDictionaryFetchParams {
 	skip: number;
 }
 
+export interface IGetManyDictEntriesPrams {
+	lang: string;
+	ids: Array<string>;
+}
+
+export interface IGetManyTagsPrams {
+	lang: string;
+	ids: Array<string>;
+}
+
 export interface IListDocumentsParams {
 	sortBy: 'title' | 'createdAt';
 	skip: number;
 	limit: number;
 	excerptLength: number;
+}
+
+export interface IListDictionaryParams {
+	sortBy: {
+		key: keyof Pick<
+			IDictionaryEntry,
+			'comment' | 'key' | 'spelling' | 'translations'
+		>;
+		order: 'ascend' | 'descend';
+	};
+	filter?: {
+		[key in keyof Pick<
+			IDictionaryEntry,
+			'comment' | 'key' | 'spelling' | 'translations'
+		>]?: Array<string> | null;
+	};
+	skip: number;
+	limit: number;
+	excerptLength: number;
+	lang: string;
 }
 
 export interface IDocumentExcerpt {
@@ -193,4 +248,12 @@ export interface IDocumentExcerpt {
 	createdAt: Date;
 	updatedAt: Date;
 }
-export type IListDocumentResult = Array<IDocumentExcerpt>;
+export interface IListDocumentResult {
+	total: number;
+	excerpts: Array<IDocumentExcerpt>;
+}
+
+export interface IListDictionaryResult {
+	total: number;
+	entries: Array<IDictionaryEntry>;
+}
