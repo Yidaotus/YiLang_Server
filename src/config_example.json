@@ -1,6 +1,6 @@
 {
 	"db": {
-		"connectionString": "mongodb://localhost/yitext"
+		"connectionString": "mongodb://mongo:27017/yitext"
 	},
 	"baseUrl": "localhost:3000",
 	"secret": "",
