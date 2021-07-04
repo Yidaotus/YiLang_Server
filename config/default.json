@@ -1,5 +1,5 @@
 {
-	"connectionString": "mongodb://localhost:27017/node-mongo-signup-verification-api",
+	"connectionString": "",
 	"secret": "",
 	"mail": {
         "user": "",
