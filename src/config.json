@@ -3,6 +3,7 @@
 		"connectionString": "mongodb://localhost/yitext?retryWrites=false"
 	},
 	"baseUrl": "localhost:3000",
+	"frontendUrl": "localhost:3001",
 	"secret": "",
 	"mail": {
 		"host": "smtp.ethereal.email",

@@ -2,11 +2,9 @@ import * as UserService from '../services/user.service';
 import { Request, Response, NextFunction } from 'express';
 import {
 	IApiResponse,
-	ApiStatus,
 	IRegisterParams,
 	ILoginResponseData,
 	IUserResponseData,
-	ApiPaths,
 	ILoginParams,
 	IVerifyEmailParams,
 	ApiStatuses,
@@ -20,7 +18,7 @@ const register = async (
 	next: NextFunction
 ): Promise<void> => {
 	const userDetails = req.body;
-	const verificationUrl = `${config.baseUrl}/user`;
+	const verificationUrl = `${config.frontendUrl}/verify`;
 
 	try {
 		await UserService.register(userDetails, verificationUrl);
