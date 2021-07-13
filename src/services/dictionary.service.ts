@@ -196,16 +196,40 @@ const getWithExcerpt = async ({
 	}
 	let linkExcerpt;
 	if (docSource) {
-		const root = docSource.blocks[0].fragmentables[0].root;
-		const excerptLength = 80;
-		if (root) {
-			linkExcerpt = root.substr(
-				entry.firstSeen.offset - excerptLength / 2,
-				excerptLength
-			);
+		// TODO Can this be done in mongo directly?
+		const targetFragmentable = docSource.blocks[0].fragmentables.find(
+			(frag) => frag.id === entry.firstSeen.fragmentableId
+		);
+		if (targetFragmentable) {
+			const root = targetFragmentable.root;
+			const excerptLength = 80;
+			if (root) {
+				linkExcerpt = root.substr(
+					entry.firstSeen.offset - excerptLength / 2,
+					excerptLength
+				);
+			}
 		}
 	}
-	return { entry: entry.toJSON(), linkExcerpt };
+
+	let rootEntry;
+	if (entry.root) {
+		rootEntry = await DictionaryEntry.findOne({
+			id: entry.root,
+			userId,
+		}).exec();
+	}
+
+	const subEntries = await DictionaryEntry.find({
+		root: entry.id,
+		userId,
+	});
+	return {
+		entry: entry.toJSON(),
+		rootEntry,
+		subEntries,
+		linkExcerpt,
+	};
 };
 
 const find = async ({

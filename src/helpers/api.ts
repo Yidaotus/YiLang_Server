@@ -204,6 +204,13 @@ export interface IDictionaryFetchParams {
 	skip: number;
 }
 
+export interface IDictionaryEntryFetchResponse {
+	entry: IDictionaryEntry;
+	linkExcerpt: string;
+	rootEntry?: IDictionaryEntry;
+	subEntries: Array<IDictionaryEntry>;
+}
+
 export interface IGetManyDictEntriesPrams {
 	lang: string;
 	ids: Array<string>;
