@@ -65,7 +65,7 @@ const listEntries = async ({
 	}
 
 	const entriesQuery = entriesQueryCreator.toConstructor();
-	const total = await new entriesQuery().count();
+	const total = await new entriesQuery().countDocuments();
 	const entries = await new entriesQuery()
 		.limit(limit)
 		.skip(skip)

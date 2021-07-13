@@ -47,7 +47,7 @@ const listDocuments = async ({
 		.limit(limit)
 		.skip(skip)
 		.exec();
-	const total = await DocumentModel.count({ userId });
+	const total = await DocumentModel.countDocuments({ userId });
 
 	const excerptedDocuments: Array<IDocumentExcerpt> = documents.map(
 		(doc) => ({
