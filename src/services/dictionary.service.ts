@@ -179,26 +179,33 @@ const getWithExcerpt = async ({
 	userId: Schema.Types.ObjectId;
 	id: UUID;
 }) => {
-	const entry: IDictionaryEntry = await DictionaryEntry.findOne({
+	const entry = await DictionaryEntry.findOne({
 		id,
 		userId,
 	}).exec();
-	const docSource = await DocumentModel.findOne(
-		{
-			id: entry.firstSeen.documentId,
-			'blocks.fragmentables.id': entry.firstSeen.fragmentableId,
-			userId,
-		},
-		{ 'blocks.fragmentables.$.root': 1 }
-	).exec();
+	let docSource;
+	if (entry?.firstSeen) {
+		docSource = await DocumentModel.findOne(
+			{
+				id: entry.firstSeen.documentId,
+				'blocks.fragmentables.id': entry.firstSeen.fragmentableId,
+				userId,
+			},
+			{ 'blocks.fragmentables.$.root': 1 }
+		).exec();
+	}
 	let linkExcerpt;
 	if (docSource) {
 		const root = docSource.blocks[0].fragmentables[0].root;
+		const excerptLength = 80;
 		if (root) {
-			linkExcerpt = root.substr(entry.firstSeen.offset - 20, 40);
+			linkExcerpt = root.substr(
+				entry.firstSeen.offset - excerptLength / 2,
+				excerptLength
+			);
 		}
 	}
-	return { entry, linkExcerpt };
+	return { entry: entry.toJSON(), linkExcerpt };
 };
 
 const find = async ({

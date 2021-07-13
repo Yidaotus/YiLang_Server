@@ -49,6 +49,32 @@ const getEntriesSchema = Joi.object({
 		.max(5),
 });
 
+const entrySchemaOptional = Joi.object({
+	id: Joi.string().required(),
+	key: Joi.string()
+		.required()
+		.optional(),
+	translations: Joi.array()
+		.items(Joi.string())
+		.optional(),
+	sourceDocument: Joi.string().optional(),
+	firstSeen: Joi.object({
+		documentId: Joi.string().required(),
+		fragmentableId: Joi.string().required(),
+		offset: Joi.number().required(),
+	}).optional(),
+	tags: Joi.array()
+		.items(Joi.string())
+		.optional(),
+	comment: Joi.string()
+		.optional()
+		.allow(''),
+	spelling: Joi.string()
+		.optional()
+		.allow(''),
+	root: Joi.string().optional(),
+});
+
 const entrySchema = Joi.object({
 	id: Joi.string().required(),
 	key: Joi.string().required(),
@@ -72,18 +98,7 @@ const entrySchema = Joi.object({
 	spelling: Joi.string()
 		.optional()
 		.allow(''),
-	variations: Joi.array().items(
-		Joi.object({
-			key: Joi.string().required(),
-			comment: Joi.string()
-				.optional()
-				.allow(''),
-			spelling: Joi.string()
-				.optional()
-				.allow(''),
-			tags: Joi.array().items(Joi.string()),
-		})
-	),
+	root: Joi.string().optional(),
 });
 
 const listSchema = Joi.object({
@@ -109,7 +124,7 @@ const listSchema = Joi.object({
 
 const deltaSchema = Joi.object({
 	removedEntries: Joi.array().items(Joi.string()),
-	updatedEntries: Joi.array().items(entrySchema),
+	updatedEntries: Joi.array().items(entrySchemaOptional),
 	addedEntries: Joi.array().items(entrySchema),
 });
 

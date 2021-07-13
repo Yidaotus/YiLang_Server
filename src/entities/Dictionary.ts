@@ -34,7 +34,7 @@ const DictionaryEntrySchema = new Schema<
 		translations: { type: Schema.Types.Array, required: true },
 		lang: { type: String, required: true, minlength: 2, maxlength: 5 },
 		tags: { type: Schema.Types.Array, required: true },
-		variations: { type: Schema.Types.Array, required: false },
+		root: { type: String, required: false },
 		firstSeen: { type: DocumentLinkSchema, required: false },
 		comment: { type: String, required: false },
 		spelling: { type: String, required: false },

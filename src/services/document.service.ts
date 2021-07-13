@@ -43,7 +43,7 @@ const listDocuments = async ({
 }: IListDocumentsParams & { userId: Schema.Types.ObjectId }) => {
 	// @TODO LANG!
 	const documents: Array<IDocument> = await DocumentModel.find({ userId })
-		.sort({ [sortBy]: 1 })
+		.sort({ [sortBy]: -1 })
 		.limit(limit)
 		.skip(skip)
 		.exec();
