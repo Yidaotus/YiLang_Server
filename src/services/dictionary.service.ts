@@ -204,9 +204,10 @@ const getWithExcerpt = async ({
 			const root = targetFragmentable.root;
 			const excerptLength = 80;
 			if (root) {
-				linkExcerpt = root.substr(
+				linkExcerpt = root.substring(
 					entry.firstSeen.offset - excerptLength / 2,
-					excerptLength
+					Math.min(0, excerptLength / 2 - entry.firstSeen.offset) +
+						excerptLength / 2
 				);
 			}
 		}
