@@ -57,7 +57,7 @@ const listEntries = async ({
 			if (filt) {
 				entriesQueryCreator = entriesQueryCreator.in(
 					key,
-					filt.map((fentry) => new RegExp(fentry, 'g'))
+					filt.map((fentry) => new RegExp(fentry, 'gi'))
 				);
 				isFilterQuery = true;
 			}
@@ -243,7 +243,7 @@ const find = async ({
 	searchTerm: string;
 }) => {
 	const entries: IDictionaryEntry[] = await DictionaryEntry.find({
-		key: new RegExp(`.*${searchTerm}.*`, 'g'),
+		key: new RegExp(`.*${searchTerm}.*`, 'gi'),
 		lang,
 		userId,
 	}).exec();
