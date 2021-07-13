@@ -7,6 +7,7 @@ import {
 	IListDictionaryParams,
 	IListDictionaryResult,
 	IGetManyDictEntriesPrams,
+	IDictionaryEntryFetchResponse,
 } from '../helpers/api';
 import * as DictionaryService from '../services/dictionary.service';
 import { IDictionaryEntry } from '../Document/Dictionary';
@@ -166,19 +167,22 @@ const getEntry = async (
 	const lang = req.params.lang as string;
 	const userId = req.user.id;
 	try {
-		const { entry, linkExcerpt } = await DictionaryService.getWithExcerpt({
+		const {
+			entry,
+			rootEntry,
+			subEntries,
+			linkExcerpt,
+		} = await DictionaryService.getWithExcerpt({
 			userId,
 			id,
 		});
 
-		let response: IApiResponse<IDictionaryEntry & {
-			linkExcerpt: string;
-		}>;
+		let response: IApiResponse<IDictionaryEntryFetchResponse>;
 		if (entry) {
 			response = {
 				status: ApiStatuses.OK,
 				message: 'Entries found!',
-				payload: { ...entry, linkExcerpt },
+				payload: { entry, linkExcerpt, rootEntry, subEntries },
 			};
 		} else {
 			response = {
