@@ -7,3 +7,4 @@ build/*
 certs/*.key
 certs/*.crt
 data/*
+src/config.json
