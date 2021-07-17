@@ -39,6 +39,16 @@ const DictionaryTagSchema = new Schema<
 	{ timestamps: true }
 );
 
+DictionaryTagSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function(_: unknown, ret: IDictionaryTagDocument) {
+		delete ret._id;
+		delete ret.userId;
+		delete ret.deletedAt;
+	},
+});
+
 export default mongoose.model<IDictionaryTagDocument, IDictionaryTagModel>(
 	'DictionaryTag',
 	DictionaryTagSchema
