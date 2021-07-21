@@ -6,6 +6,7 @@ import { IDictionaryEntry } from '../Document/Dictionary';
 import { addEntries } from '../controllers/dictionary.controller';
 import { getUUID, UUID } from '../Document/UUID';
 import DocumentModel from '../entities/Document';
+import { IDocumentLink, IExcerptedDocumentLink } from '../Document/Document';
 
 const fetch = async ({
 	sortBy,
@@ -201,14 +202,82 @@ const getWithExcerpt = async ({
 			(frag) => frag.id === entry.firstSeen.fragmentableId
 		);
 		if (targetFragmentable) {
+			const sentenceInOffsetRange = targetFragmentable.fragments.find(
+				(fragment) =>
+					fragment.type === 'Sentence' &&
+					fragment.range.start <= entry.firstSeen.offset &&
+					fragment.range.end >= entry.firstSeen.offset
+			);
 			const root = targetFragmentable.root;
-			const excerptLength = 80;
-			if (root) {
+			if (sentenceInOffsetRange) {
 				linkExcerpt = root.substring(
-					entry.firstSeen.offset - excerptLength / 2,
-					Math.min(0, excerptLength / 2 - entry.firstSeen.offset) +
-						excerptLength / 2
+					sentenceInOffsetRange.range.start,
+					sentenceInOffsetRange.range.end
 				);
+			} else {
+				const excerptLength = 80;
+				if (root) {
+					linkExcerpt = root.substring(
+						entry.firstSeen.offset - excerptLength / 2,
+						Math.min(
+							0,
+							excerptLength / 2 - entry.firstSeen.offset
+						) +
+							excerptLength / 2
+					);
+				}
+			}
+		}
+	}
+
+	const otherSources = await DocumentModel.find({
+		userId,
+	})
+		.where('id')
+		.ne(entry.firstSeen.documentId)
+		.exec();
+	const searchRE = new RegExp(entry.key, 'gi');
+	// TODO maybe this should be cached in some way
+	const otherExcerpts = new Array<IExcerptedDocumentLink>();
+	for (const otherSource of otherSources) {
+		for (const block of otherSource.blocks) {
+			for (const fragmentable of block.fragmentables) {
+				const foundIndex = fragmentable.root.search(searchRE);
+				if (foundIndex > -1) {
+					const sentenceInOffsetRange = fragmentable.fragments.find(
+						(fragment) =>
+							fragment.type === 'Sentence' &&
+							fragment.range.start <= foundIndex &&
+							fragment.range.end >= foundIndex
+					);
+					const root = fragmentable.root;
+					let excerpt;
+					if (sentenceInOffsetRange) {
+						excerpt = root.substring(
+							sentenceInOffsetRange.range.start,
+							sentenceInOffsetRange.range.end
+						);
+					} else {
+						const excerptLength = 80;
+						if (root) {
+							excerpt = root.substring(
+								foundIndex - excerptLength / 2,
+								Math.min(0, excerptLength / 2 - foundIndex) +
+									excerptLength / 2
+							);
+						}
+					}
+					if (excerpt) {
+						otherExcerpts.push({
+							link: {
+								documentId: otherSource.id,
+								fragmentableId: fragmentable.id,
+								offset: foundIndex,
+							},
+							excerpt,
+						});
+					}
+				}
 			}
 		}
 	}
@@ -230,6 +299,7 @@ const getWithExcerpt = async ({
 		rootEntry,
 		subEntries,
 		linkExcerpt,
+		otherExcerpts,
 	};
 };
 

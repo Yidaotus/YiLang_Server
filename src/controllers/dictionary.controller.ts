@@ -172,6 +172,7 @@ const getEntry = async (
 			rootEntry,
 			subEntries,
 			linkExcerpt,
+			otherExcerpts,
 		} = await DictionaryService.getWithExcerpt({
 			userId,
 			id,
@@ -182,7 +183,13 @@ const getEntry = async (
 			response = {
 				status: ApiStatuses.OK,
 				message: 'Entries found!',
-				payload: { entry, linkExcerpt, rootEntry, subEntries },
+				payload: {
+					entry,
+					linkExcerpt,
+					rootEntry,
+					subEntries,
+					otherExcerpts,
+				},
 			};
 		} else {
 			response = {

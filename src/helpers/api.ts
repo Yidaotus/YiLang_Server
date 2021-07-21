@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongoose';
 import { IDictionaryEntry, IDictionaryTag } from '../Document/Dictionary';
+import { IDocumentLink, IExcerptedDocumentLink } from '../Document/Document';
 
 export type DictionaryEntryField =
 	| 'word'
@@ -206,9 +207,10 @@ export interface IDictionaryFetchParams {
 
 export interface IDictionaryEntryFetchResponse {
 	entry: IDictionaryEntry;
-	linkExcerpt: string;
 	rootEntry?: IDictionaryEntry;
 	subEntries: Array<IDictionaryEntry>;
+	linkExcerpt: string;
+	otherExcerpts?: Array<IExcerptedDocumentLink>;
 }
 
 export interface IGetManyDictEntriesPrams {
