@@ -1,5 +1,5 @@
 import DictionaryEntry, { IDictionaryEntryDB } from '../entities/Dictionary';
-import { Query, Schema } from 'mongoose';
+import { LeanDocument, Query, Schema } from 'mongoose';
 import * as radix from '../helpers/Radix';
 import { DictionaryEntryField, IListDictionaryParams } from '../helpers/api';
 import { IDictionaryEntry } from '../Document/Dictionary';
@@ -7,6 +7,7 @@ import { addEntries } from '../controllers/dictionary.controller';
 import { getUUID, UUID } from '../Document/UUID';
 import DocumentModel from '../entities/Document';
 import { IDocumentLink, IExcerptedDocumentLink } from '../Document/Document';
+import { Option } from '../Document/Utility';
 
 const fetch = async ({
 	sortBy,
@@ -173,19 +174,31 @@ const get = async ({
 	return entries;
 };
 
+interface IEntryWithExcerpt {
+	entry: IDictionaryEntry;
+	rootEntry: IDictionaryEntry;
+	subEntries: IDictionaryEntry[];
+	linkExcerpt: string;
+	otherExcerpts: IExcerptedDocumentLink[];
+}
 const getWithExcerpt = async ({
 	userId,
 	id,
 }: {
 	userId: Schema.Types.ObjectId;
 	id: UUID;
-}) => {
+}): Promise<Option<IEntryWithExcerpt>> => {
 	const entry = await DictionaryEntry.findOne({
 		id,
 		userId,
 	}).exec();
+
+	if (!entry) {
+		return null;
+	}
+
 	let docSource;
-	if (entry?.firstSeen) {
+	if (entry.firstSeen) {
 		docSource = await DocumentModel.findOne(
 			{
 				id: entry.firstSeen.documentId,
@@ -234,7 +247,7 @@ const getWithExcerpt = async ({
 		userId,
 	})
 		.where('id')
-		.ne(entry.firstSeen.documentId)
+		.ne(entry.firstSeen?.documentId)
 		.exec();
 	const searchRE = new RegExp(entry.key, 'gi');
 	// TODO maybe this should be cached in some way
@@ -294,13 +307,14 @@ const getWithExcerpt = async ({
 		root: entry.id,
 		userId,
 	});
-	return {
+	const result = {
 		entry: entry.toJSON(),
 		rootEntry,
 		subEntries,
 		linkExcerpt,
 		otherExcerpts,
 	};
+	return result;
 };
 
 const find = async ({

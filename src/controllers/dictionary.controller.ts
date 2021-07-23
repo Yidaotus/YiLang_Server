@@ -167,19 +167,20 @@ const getEntry = async (
 	const lang = req.params.lang as string;
 	const userId = req.user.id;
 	try {
-		const {
-			entry,
-			rootEntry,
-			subEntries,
-			linkExcerpt,
-			otherExcerpts,
-		} = await DictionaryService.getWithExcerpt({
+		const getResult = await DictionaryService.getWithExcerpt({
 			userId,
 			id,
 		});
-
+		console.log(getResult.entry);
 		let response: IApiResponse<IDictionaryEntryFetchResponse>;
-		if (entry) {
+		if (getResult) {
+			const {
+				entry,
+				rootEntry,
+				subEntries,
+				linkExcerpt,
+				otherExcerpts,
+			} = getResult;
 			response = {
 				status: ApiStatuses.OK,
 				message: 'Entries found!',
