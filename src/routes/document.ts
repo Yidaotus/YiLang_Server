@@ -33,4 +33,10 @@ router[ApiEndpoints.getById.method](
 	privilegedRequest(DocumentController.getDocument)
 );
 
+router[ApiEndpoints.remove.method](
+	`/${ApiEndpoints.remove.path}/:id`,
+	jwtGuard,
+	privilegedRequest(DocumentController.removeDocument)
+);
+
 export default router;

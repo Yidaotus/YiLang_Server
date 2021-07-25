@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { IDocument } from '../Document/Document';
 import {
 	IApiResponse,
@@ -41,7 +41,7 @@ const listDocuments = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const { sortBy, skip, limit, excerptLength } = req.body;
+	const { sortBy, skip, limit, excerptLength, lang } = req.body;
 	try {
 		const userId = req.user.id;
 		const excerptedDocuments = await DocumentService.listDocuments({
@@ -50,6 +50,7 @@ const listDocuments = async (
 			limit,
 			excerptLength,
 			userId,
+			lang,
 		});
 
 		let response: IApiResponse<IListDocumentResult>;
@@ -108,4 +109,35 @@ const getDocument = async (
 	}
 };
 
-export { saveOrUpdateDocument as saveDocument, getDocument, listDocuments };
+const removeDocument = async (
+	req: IPriviligedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const id = req.params.id as UUID;
+	const userId = req.user.id;
+	try {
+		//await UserService.register(userDetails, verificationUrl);
+		const document = await DocumentService.remove({
+			id,
+			userId,
+		});
+
+		let response: IApiResponse;
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Document removed!',
+			payload: null,
+		};
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+export {
+	saveOrUpdateDocument as saveDocument,
+	getDocument,
+	listDocuments,
+	removeDocument,
+};

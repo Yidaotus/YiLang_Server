@@ -40,9 +40,13 @@ const listDocuments = async ({
 	skip,
 	excerptLength,
 	userId,
+	lang,
 }: IListDocumentsParams & { userId: Schema.Types.ObjectId }) => {
 	// @TODO LANG!
-	const documents: Array<IDocument> = await DocumentModel.find({ userId })
+	const documents: Array<IDocument> = await DocumentModel.find({
+		userId,
+		lang,
+	})
 		.sort({ [sortBy]: -1 })
 		.limit(limit)
 		.skip(skip)
@@ -79,6 +83,19 @@ const get = async ({
 	return document;
 };
 
+const remove = async ({
+	userId,
+	id,
+}: {
+	userId: Schema.Types.ObjectId;
+	id: UUID;
+}) => {
+	const document = await DocumentModel.deleteOne({
+		id,
+		userId,
+	}).exec();
+};
+
 const saveOrUpdate = async ({
 	userId,
 	id,
@@ -93,4 +110,4 @@ const saveOrUpdate = async ({
 		runValidators: true,
 	}).exec();
 };
-export { listDocuments, get, saveOrUpdate };
+export { listDocuments, get, saveOrUpdate, remove };

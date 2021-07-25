@@ -68,6 +68,10 @@ const ApiPaths: { [key: string]: ApiPath } = {
 				path: 'entries',
 				method: 'get',
 			},
+			remove: {
+				path: 'entries',
+				method: 'delete',
+			},
 		},
 	},
 	tags: {
@@ -228,6 +232,7 @@ export interface IListDocumentsParams {
 	skip: number;
 	limit: number;
 	excerptLength: number;
+	lang: string;
 }
 
 export interface IListDictionaryParams {

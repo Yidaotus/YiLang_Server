@@ -7,7 +7,7 @@ import { addEntries } from '../controllers/dictionary.controller';
 import { getUUID, UUID } from '../Document/UUID';
 import DocumentModel from '../entities/Document';
 import { IDocumentLink, IExcerptedDocumentLink } from '../Document/Document';
-import { Option } from '../Document/Utility';
+import { Option, substringWithLength } from '../Document/Utility';
 
 const fetch = async ({
 	sortBy,
@@ -38,7 +38,6 @@ const listEntries = async ({
 	sortBy,
 	limit,
 	skip,
-	excerptLength,
 	lang,
 	userId,
 	filter,
@@ -181,6 +180,8 @@ interface IEntryWithExcerpt {
 	linkExcerpt: string;
 	otherExcerpts: IExcerptedDocumentLink[];
 }
+
+const excerptLength = 80;
 const getWithExcerpt = async ({
 	userId,
 	id,
@@ -228,17 +229,11 @@ const getWithExcerpt = async ({
 					sentenceInOffsetRange.range.end
 				);
 			} else {
-				const excerptLength = 80;
-				if (root) {
-					linkExcerpt = root.substring(
-						entry.firstSeen.offset - excerptLength / 2,
-						Math.min(
-							0,
-							excerptLength / 2 - entry.firstSeen.offset
-						) +
-							excerptLength / 2
-					);
-				}
+				linkExcerpt = substringWithLength({
+					root,
+					length: excerptLength,
+					index: entry.firstSeen.offset,
+				});
 			}
 		}
 	}
@@ -271,14 +266,11 @@ const getWithExcerpt = async ({
 							sentenceInOffsetRange.range.end
 						);
 					} else {
-						const excerptLength = 80;
-						if (root) {
-							excerpt = root.substring(
-								foundIndex - excerptLength / 2,
-								Math.min(0, excerptLength / 2 - foundIndex) +
-									excerptLength / 2
-							);
-						}
+						excerpt = substringWithLength({
+							root,
+							length: excerptLength,
+							index: entry.firstSeen.offset,
+						});
 					}
 					if (excerpt) {
 						otherExcerpts.push({
