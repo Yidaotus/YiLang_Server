@@ -151,7 +151,7 @@ const DocumentSchema = new Schema<IDocumentDB>(
 		updatedAt: Date,
 		deletedAt: Date,
 		blocks: [BlockSchema],
-		title: { type: String, required: true },
+		title: { type: String, required: false },
 		userId: { type: Schema.Types.ObjectId, required: true },
 		renderMap: { type: [[RenderMapSchema]], required: true },
 		id: { type: String, require: true },

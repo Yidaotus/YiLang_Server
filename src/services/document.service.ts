@@ -51,7 +51,7 @@ const listDocuments = async ({
 		.limit(limit)
 		.skip(skip)
 		.exec();
-	const total = await DocumentModel.countDocuments({ userId });
+	const total = await DocumentModel.countDocuments({ userId, lang });
 
 	const excerptedDocuments: Array<IDocumentExcerpt> = documents.map(
 		(doc) => ({
@@ -60,7 +60,7 @@ const listDocuments = async ({
 			excerpt: generateExcerpt({
 				doc,
 				excerptLength,
-				filter: ['Paragraph', 'Image'],
+				filter: ['Paragraph', 'Image', 'Dialog'],
 			}),
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt,

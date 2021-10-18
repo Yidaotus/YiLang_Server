@@ -181,7 +181,7 @@ interface IEntryWithExcerpt {
 	otherExcerpts: IExcerptedDocumentLink[];
 }
 
-const excerptLength = 80;
+const DEFAULT_EXCERPT_LENGTH = 80;
 const getWithExcerpt = async ({
 	userId,
 	id,
@@ -231,7 +231,7 @@ const getWithExcerpt = async ({
 			} else {
 				linkExcerpt = substringWithLength({
 					root,
-					length: excerptLength,
+					length: DEFAULT_EXCERPT_LENGTH,
 					index: entry.firstSeen.offset,
 				});
 			}
@@ -268,8 +268,8 @@ const getWithExcerpt = async ({
 					} else {
 						excerpt = substringWithLength({
 							root,
-							length: excerptLength,
-							index: entry.firstSeen.offset,
+							length: DEFAULT_EXCERPT_LENGTH,
+							index: foundIndex,
 						});
 					}
 					if (excerpt) {
@@ -318,7 +318,7 @@ const find = async ({
 	lang: string;
 	searchTerm: string;
 }) => {
-	const entries: IDictionaryEntry[] = await DictionaryEntry.find({
+	const entries = await DictionaryEntry.find({
 		key: new RegExp(`.*${searchTerm}.*`, 'gi'),
 		lang,
 		userId,

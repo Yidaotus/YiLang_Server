@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongoose';
 import { IDictionaryEntry, IDictionaryTag } from '../Document/Dictionary';
 import { IDocumentLink, IExcerptedDocumentLink } from '../Document/Document';
+import { UUID } from '../Document/UUID';
 
 export type DictionaryEntryField =
 	| 'word'
@@ -32,6 +33,23 @@ interface ApiPath {
 }
 
 const ApiPaths: { [key: string]: ApiPath } = {
+	config: {
+		path: 'config',
+		endpoints: {
+			get: {
+				method: 'get',
+				path: '/',
+			},
+			set: {
+				method: 'post',
+				path: '/',
+			},
+			setActiveLanguage: {
+				method: 'post',
+				path: '/activeLanguage',
+			},
+		},
+	},
 	user: {
 		path: 'user',
 		endpoints: {
@@ -270,4 +288,8 @@ export interface IListDocumentResult {
 export interface IListDictionaryResult {
 	total: number;
 	entries: Array<IDictionaryEntry>;
+}
+
+export interface ISetActiveLangParams {
+	languageId: UUID;
 }

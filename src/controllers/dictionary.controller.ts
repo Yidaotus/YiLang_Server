@@ -12,7 +12,8 @@ import {
 import * as DictionaryService from '../services/dictionary.service';
 import { IDictionaryEntry } from '../Document/Dictionary';
 import { IPriviligedRequest } from '../routes';
-import { UUID } from '../Document/UUID';
+import { getUUID, UUID } from '../Document/UUID';
+import DictionaryEntry, { IDictionaryEntryDB } from '../entities/Dictionary';
 
 const list = async (
 	req: IPriviligedRequest<IListDictionaryParams>,
@@ -66,12 +67,20 @@ const getMany = async (
 			ids: ids as Array<UUID>,
 		});
 
+		const rootIds = entries.map((entry) => entry.root);
+		const rootEntries = await DictionaryService.get({
+			userId,
+			ids: rootIds,
+		});
+
+		const resultEntries = [...entries, ...rootEntries];
+
 		let response: IApiResponse<IDictionaryEntry[]>;
 		if (entries.length > 0) {
 			response = {
 				status: ApiStatuses.OK,
 				message: 'Entries found!',
-				payload: entries,
+				payload: resultEntries,
 			};
 		} else {
 			response = {
@@ -138,6 +147,14 @@ const searchEntries = async (
 			searchTerm,
 		});
 
+		// @TODO WEIRD HACK FOR IMPORTED DICTIONRY REMOVE!!!
+		for (const foundEntry of entries) {
+			if (!foundEntry.id) {
+				foundEntry.id = getUUID();
+				foundEntry.save();
+			}
+		}
+
 		let response: IApiResponse<Array<IDictionaryEntry>>;
 		if (entries && entries.length > 0) {
 			response = {
@@ -149,7 +166,7 @@ const searchEntries = async (
 			response = {
 				status: ApiStatuses.OK,
 				message: 'No entries found!',
-				payload: null,
+				payload: [],
 			};
 		}
 		res.status(200).json(response);

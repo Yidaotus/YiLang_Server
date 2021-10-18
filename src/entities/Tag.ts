@@ -15,8 +15,8 @@ export interface IDictionaryTagModel extends Model<IDictionaryTagDocument> {}
 const GrammarPointSchema = new Schema<IGrammarPoint>(
 	{
 		name: { type: String, required: true },
-		description: { type: String, required: true },
-		construction: { type: [String], required: true },
+		description: { type: String, required: false },
+		construction: { type: [String], required: false },
 	},
 	{ _id: false }
 );

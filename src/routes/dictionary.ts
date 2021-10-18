@@ -9,44 +9,29 @@ const router = Router();
 const ApiEndpoints = ApiPaths.dict.endpoints;
 
 const documentSchema = Joi.object({
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	document: Joi.string().required(),
 });
 
 const searchEntrySchema = Joi.object({
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	key: Joi.string().required(),
 });
 
 const getEntrySchema = Joi.object({
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	id: Joi.string()
 		.length(36)
 		.required(),
 });
 
 const getAllSchema = Joi.object({
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 });
 
 const getEntriesSchema = Joi.object({
 	ids: Joi.array().items(Joi.string()),
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 });
 
 const entrySchemaOptional = Joi.object({
@@ -81,10 +66,7 @@ const entrySchema = Joi.object({
 	translations: Joi.array()
 		.items(Joi.string())
 		.required(),
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	sourceDocument: Joi.string().optional(),
 	firstSeen: Joi.object({
 		documentId: Joi.string().required(),
@@ -132,10 +114,7 @@ const fetchSchema = Joi.object({
 	sortBy: Joi.string()
 		.valid('word', 'translation', 'created')
 		.required(),
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	limit: Joi.number()
 		.valid(1, 10, 25, 50)
 		.optional(),

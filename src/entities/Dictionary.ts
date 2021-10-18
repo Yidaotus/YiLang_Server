@@ -32,7 +32,7 @@ const DictionaryEntrySchema = new Schema<
 		id: { type: String, required: true },
 		key: { type: String, required: true },
 		translations: { type: Schema.Types.Array, required: true },
-		lang: { type: String, required: true, minlength: 2, maxlength: 5 },
+		lang: { type: String, required: true },
 		tags: { type: Schema.Types.Array, required: true },
 		root: { type: String, required: false },
 		firstSeen: { type: DocumentLinkSchema, required: false },

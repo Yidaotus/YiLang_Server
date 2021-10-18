@@ -8,10 +8,7 @@ const router = Router();
 const ApiEndpoints = ApiPaths.document.endpoints;
 
 const documentSchema = Joi.object({
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	document: Joi.string().required(),
 });
 

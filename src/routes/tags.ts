@@ -9,17 +9,11 @@ const router = Router();
 const ApiEndpoints = ApiPaths.tags.endpoints;
 
 const getAllSchema = Joi.object({
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 });
 
 const getEntriesSchema = Joi.object({
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	ids: Joi.array()
 		.items(Joi.string())
 		.required(),
@@ -28,10 +22,7 @@ const getEntriesSchema = Joi.object({
 const tagSchema = Joi.object({
 	id: Joi.string().required(),
 	name: Joi.string(),
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	color: Joi.string()
 		.optional()
 		.allow(''),
@@ -51,10 +42,7 @@ const fetchSchema = Joi.object({
 	sortBy: Joi.string()
 		.valid('word', 'translation', 'created')
 		.required(),
-	lang: Joi.string()
-		.required()
-		.min(2)
-		.max(5),
+	lang: Joi.string().required(),
 	limit: Joi.number()
 		.valid(1, 10, 25, 50)
 		.optional(),
