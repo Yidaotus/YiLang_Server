@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
-import { IDictionaryEntry } from '../Document/Dictionary';
-import { IDocumentLink } from '../Document/Document';
+import { IDictionaryEntry, IDocumentLink } from '../Document/Dictionary';
 
 export interface IDictionaryEntryDB extends IDictionaryEntry {
 	_id: ObjectId;

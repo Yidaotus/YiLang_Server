@@ -3,10 +3,7 @@ import { Schema } from 'mongoose';
 import * as radix from '../helpers/Radix';
 import { DictionaryEntryField, IListDictionaryParams } from '../helpers/api';
 import { IDictionaryEntry } from '../Document/Dictionary';
-import { UUID } from '../Document/UUID';
-import DocumentModel from '../entities/Document';
 import { IExcerptedDocumentLink } from '../Document/Document';
-import { Option, substringWithLength } from '../Document/Utility';
 
 const fetch = async ({
 	sortBy,
@@ -155,7 +152,7 @@ const update = async ({
 	newEntry,
 }: {
 	userId: Schema.Types.ObjectId;
-	id: UUID;
+	id: string;
 	newEntry: IDictionaryEntry;
 }) => {
 	await DictionaryEntry.updateOne({ id: id, userId }, { ...newEntry });
@@ -163,16 +160,16 @@ const update = async ({
 
 const get = async ({
 	userId,
-	ids,
+	id,
 }: {
 	userId: Schema.Types.ObjectId;
-	ids: Array<UUID>;
-}): Promise<Array<IDictionaryEntry>> => {
-	const entries = await DictionaryEntry.find({
-		id: ids,
+	id: string;
+}): Promise<IDictionaryEntry> => {
+	const entry = await DictionaryEntry.findOne({
+		_id: id,
 		userId,
 	}).exec();
-	return entries;
+	return entry;
 };
 
 interface IEntryWithExcerpt {
@@ -183,13 +180,14 @@ interface IEntryWithExcerpt {
 	otherExcerpts: IExcerptedDocumentLink[];
 }
 
+/*
 const DEFAULT_EXCERPT_LENGTH = 80;
 const getWithExcerpt = async ({
 	userId,
 	id,
 }: {
 	userId: Schema.Types.ObjectId;
-	id: UUID;
+	id: string;
 }): Promise<Option<IEntryWithExcerpt>> => {
 	const entry = await DictionaryEntry.findOne({
 		_id: id,
@@ -205,7 +203,7 @@ const getWithExcerpt = async ({
 		docSource = await DocumentModel.findOne(
 			{
 				id: entry.firstSeen.documentId,
-				'blocks.fragmentables.id': entry.firstSeen.fragmentableId,
+				'blocks.fragmentables.id': entry.firstSeen,
 				userId,
 			},
 			{ 'blocks.fragmentables.$.root': 1 }
@@ -215,7 +213,7 @@ const getWithExcerpt = async ({
 	if (docSource) {
 		// TODO Can this be done in mongo directly?
 		const targetFragmentable = docSource.blocks[0].fragmentables.find(
-			(frag) => frag.id === entry.firstSeen.fragmentableId
+			(frag) => frag.id === entry.firstSeen
 		);
 		if (targetFragmentable) {
 			const sentenceInOffsetRange = targetFragmentable.fragments.find(
@@ -310,6 +308,7 @@ const getWithExcerpt = async ({
 	};
 	return result;
 };
+*/
 
 const find = async ({
 	userId,
@@ -335,7 +334,6 @@ export {
 	remove,
 	create,
 	update,
-	getWithExcerpt,
 	get,
 	find,
 };

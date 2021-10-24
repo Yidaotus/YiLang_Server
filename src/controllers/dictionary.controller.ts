@@ -5,8 +5,6 @@ import {
 	IDictionaryFetchParams,
 	IListDictionaryParams,
 	IListDictionaryResult,
-	IGetManyDictEntriesPrams,
-	IDictionaryEntryFetchResponse,
 	ISearchDictionaryParams,
 } from '../helpers/api';
 import * as DictionaryService from '../services/dictionary.service';
@@ -44,48 +42,6 @@ const list = async (
 				status: ApiStatuses.OK,
 				message: 'No Document found!',
 				payload: { total: 0, entries: [] },
-			};
-		}
-
-		res.status(200).json(response);
-	} catch (err) {
-		next(err);
-	}
-};
-
-const getMany = async (
-	req: IPriviligedRequest<IGetManyDictEntriesPrams>,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	const userId = req.user.id;
-	const { ids } = req.body;
-	try {
-		const entries = await DictionaryService.get({
-			userId,
-			ids: ids as Array<UUID>,
-		});
-
-		const rootIds = entries.map((entry) => entry.root);
-		const rootEntries = await DictionaryService.get({
-			userId,
-			ids: rootIds,
-		});
-
-		const resultEntries = [...entries, ...rootEntries];
-
-		let response: IApiResponse<IDictionaryEntry[]>;
-		if (entries.length > 0) {
-			response = {
-				status: ApiStatuses.OK,
-				message: 'Entries found!',
-				payload: resultEntries,
-			};
-		} else {
-			response = {
-				status: ApiStatuses.OK,
-				message: 'No entries found!',
-				payload: [],
 			};
 		}
 
@@ -178,34 +134,19 @@ const getEntry = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id as UUID;
-	const lang = req.params.lang as string;
+	const id = req.params.id;
 	const userId = req.user.id;
 	try {
-		const getResult = await DictionaryService.getWithExcerpt({
+		const getResult = await DictionaryService.get({
 			userId,
 			id,
 		});
-		console.log(getResult.entry);
-		let response: IApiResponse<IDictionaryEntryFetchResponse>;
+		let response: IApiResponse<IDictionaryEntry>;
 		if (getResult) {
-			const {
-				entry,
-				rootEntry,
-				subEntries,
-				linkExcerpt,
-				otherExcerpts,
-			} = getResult;
 			response = {
 				status: ApiStatuses.OK,
 				message: 'Entries found!',
-				payload: {
-					entry,
-					linkExcerpt,
-					rootEntry,
-					subEntries,
-					otherExcerpts,
-				},
+				payload: getResult,
 			};
 		} else {
 			response = {
@@ -345,5 +286,4 @@ export {
 	list,
 	getAll,
 	fetchEntries,
-	getMany,
 };

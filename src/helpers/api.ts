@@ -1,6 +1,5 @@
-import { ObjectId } from 'mongoose';
 import { IDictionaryEntry, IDictionaryTag } from '../Document/Dictionary';
-import { IDocumentLink, IExcerptedDocumentLink } from '../Document/Document';
+import { IExcerptedDocumentLink } from '../Document/Document';
 import { UUID } from '../Document/UUID';
 
 export type DictionaryEntryField =
@@ -234,10 +233,6 @@ export interface IDictionaryFetchParams {
 
 export interface IDictionaryEntryFetchResponse {
 	entry: IDictionaryEntry;
-	linkExcerpt: string;
-	rootEntry?: IDictionaryEntry;
-	subEntries: Array<IDictionaryEntry>;
-	otherExcerpts?: Array<IExcerptedDocumentLink>;
 }
 
 export interface IAddTagParams {
