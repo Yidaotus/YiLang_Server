@@ -25,7 +25,7 @@ const saveOrUpdateDocument = async (
 			newDocument,
 		});
 
-		const response: IApiResponse = {
+		const response: IApiResponse<null> = {
 			status: ApiStatuses.OK,
 			message: 'Document saved successful!',
 			payload: null,
@@ -123,7 +123,7 @@ const removeDocument = async (
 			userId,
 		});
 
-		let response: IApiResponse;
+		let response: IApiResponse<null>;
 		response = {
 			status: ApiStatuses.OK,
 			message: 'Document removed!',

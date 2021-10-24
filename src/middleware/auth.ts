@@ -26,7 +26,7 @@ const privilegedRequest = <T>(cb: PrivilegedRequestCallback<T>) => async (
 	if (isRequestPriviliged<T>(req)) {
 		cb(req, res, next);
 	} else {
-		const response: IApiResponse = {
+		const response: IApiResponse<null> = {
 			status: ApiStatuses.UNAUTHORIZED,
 			message: 'Unauthorized',
 			payload: null,
@@ -57,7 +57,7 @@ const jwtGuard = async (
 		}
 		(req as IPriviligedRequest<unknown>).user = user.toJSON();
 	} catch (err) {
-		const response: IApiResponse = {
+		const response: IApiResponse<null> = {
 			status: ApiStatuses.UNAUTHORIZED,
 			message: 'Unauthorized',
 			payload: null,

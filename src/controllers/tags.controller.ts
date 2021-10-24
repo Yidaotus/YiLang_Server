@@ -3,12 +3,38 @@ import {
 	IApiResponse,
 	ApiStatuses,
 	IGetManyTagsPrams,
-	ITagDelta,
+	IAddDictionaryTagParams,
 } from '../helpers/api';
 import { IDictionaryTag } from '../Document/Dictionary';
 import { IPriviligedRequest } from '../routes';
 import * as TagService from '../services/tags.service';
 import { UUID } from '../Document/UUID';
+
+const add = async (
+	req: IPriviligedRequest<IAddDictionaryTagParams>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	try {
+		const tag = req.body;
+		const newTagId = await TagService.create({
+			userId,
+			tag,
+		});
+
+		let response: IApiResponse<string>;
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Tag created!',
+			payload: newTagId,
+		};
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
 
 const getMany = async (
 	req: IPriviligedRequest<IGetManyTagsPrams>,
@@ -79,35 +105,4 @@ const getAll = async (
 	}
 };
 
-const applyDelta = async (
-	req: IPriviligedRequest<ITagDelta>,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	const { removedTags, updatedTags, addedTags } = req.body;
-
-	const userId = req.user.id;
-	try {
-		await TagService.remove({ userId, ids: removedTags });
-		await TagService.create({ userId, tags: addedTags });
-
-		for (const updatedTag of updatedTags) {
-			await TagService.update({
-				userId,
-				id: updatedTag.id,
-				newTag: updatedTag,
-			});
-		}
-
-		const response: IApiResponse = {
-			status: ApiStatuses.OK,
-			message: 'Entrie(s) added successful!',
-			payload: null,
-		};
-		res.status(200).json(response);
-	} catch (err) {
-		next(err);
-	}
-};
-
-export { getAll, getMany, applyDelta };
+export { getAll, getMany, add };

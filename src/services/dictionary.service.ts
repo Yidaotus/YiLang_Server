@@ -1,12 +1,11 @@
 import DictionaryEntry, { IDictionaryEntryDB } from '../entities/Dictionary';
-import { LeanDocument, Query, Schema } from 'mongoose';
+import { Schema } from 'mongoose';
 import * as radix from '../helpers/Radix';
 import { DictionaryEntryField, IListDictionaryParams } from '../helpers/api';
 import { IDictionaryEntry } from '../Document/Dictionary';
-import { addEntries } from '../controllers/dictionary.controller';
-import { getUUID, UUID } from '../Document/UUID';
+import { UUID } from '../Document/UUID';
 import DocumentModel from '../entities/Document';
-import { IDocumentLink, IExcerptedDocumentLink } from '../Document/Document';
+import { IExcerptedDocumentLink } from '../Document/Document';
 import { Option, substringWithLength } from '../Document/Utility';
 
 const fetch = async ({
@@ -134,17 +133,20 @@ const remove = async ({
 
 const create = async ({
 	userId,
-	entries,
+	entry,
 }: {
 	userId: Schema.Types.ObjectId;
-	entries: Array<IDictionaryEntry>;
-}) => {
-	const entriesToInsert = entries.map((entry) => ({
-		...entry,
-		userId,
-	}));
-
-	await DictionaryEntry.create(entriesToInsert);
+	entry: IDictionaryEntry;
+}): Promise<number> => {
+	try {
+		const { id } = await DictionaryEntry.create({ ...entry, userId });
+		return id;
+	} catch (e) {
+		if (e instanceof Error && e.message.startsWith('E11000')) {
+			throw new Error(`Entry: ${entry.key} already exists!`);
+		}
+		throw e;
+	}
 };
 
 const update = async ({
@@ -190,7 +192,7 @@ const getWithExcerpt = async ({
 	id: UUID;
 }): Promise<Option<IEntryWithExcerpt>> => {
 	const entry = await DictionaryEntry.findOne({
-		id,
+		_id: id,
 		userId,
 	}).exec();
 

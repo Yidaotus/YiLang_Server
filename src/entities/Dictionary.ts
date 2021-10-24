@@ -29,7 +29,6 @@ const DictionaryEntrySchema = new Schema<
 	IDictionaryEntryModel
 >(
 	{
-		id: { type: String, required: true },
 		key: { type: String, required: true },
 		translations: { type: Schema.Types.Array, required: true },
 		lang: { type: String, required: true },
@@ -47,7 +46,7 @@ const DictionaryEntrySchema = new Schema<
 	{ timestamps: true }
 );
 
-DictionaryEntrySchema.index({ id: 1, lang: 1, userId: 1 }, { unique: true });
+DictionaryEntrySchema.index({ key: 1, lang: 1, userId: 1 }, { unique: true });
 
 DictionaryEntrySchema.set('toJSON', {
 	virtuals: true,

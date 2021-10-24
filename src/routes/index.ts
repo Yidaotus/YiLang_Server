@@ -18,10 +18,10 @@ export interface IPriviligedRequest<T = void> extends IApiRequest<T> {
 	user: IUser;
 }
 
-router.use(`/${ApiPaths.user.path}`, UserRouter);
-router.use(`/${ApiPaths.dict.path}`, DictRouter);
-router.use(`/${ApiPaths.document.path}`, DocumentRouter);
-router.use(`/${ApiPaths.tags.path}`, TagsRouter);
-router.use(`/${ApiPaths.config.path}`, ConfigRouter);
+router.use('/user', UserRouter);
+router.use('/dictionary/entries', DictRouter);
+router.use('/documents', DocumentRouter);
+router.use('/dictionary/tags', TagsRouter);
+router.use('/config', ConfigRouter);
 
 export default router;

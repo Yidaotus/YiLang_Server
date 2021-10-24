@@ -1,12 +1,10 @@
 import { Router } from 'express';
 import * as TagsController from '../controllers/tags.controller';
-import { ApiPaths } from '../helpers/api';
 import Joi from 'joi';
 import { validate } from '../middleware/validator';
 import { jwtGuard, privilegedRequest } from '../middleware/auth';
 
 const router = Router();
-const ApiEndpoints = ApiPaths.tags.endpoints;
 
 const getAllSchema = Joi.object({
 	lang: Joi.string().required(),
@@ -49,34 +47,18 @@ const fetchSchema = Joi.object({
 	skip: Joi.number().optional(),
 });
 
-router[ApiEndpoints.getMany.method](
-	ApiEndpoints.getMany.path,
+router.post(
+	'/',
 	jwtGuard,
-	validate(getEntriesSchema, 'body'),
-	privilegedRequest(TagsController.getMany)
+	validate(tagSchema, 'body'),
+	privilegedRequest(TagsController.add)
 );
 
-router[ApiEndpoints.getAll.method](
-	`/${ApiEndpoints.getAll.path}/:lang`,
+router.get(
+	'/byLanguage/:lang',
 	jwtGuard,
 	validate(getAllSchema, 'params'),
 	privilegedRequest(TagsController.getAll)
 );
-
-router[ApiEndpoints.applyDelta.method](
-	`/${ApiEndpoints.applyDelta.path}`,
-	jwtGuard,
-	validate(deltaSchema, 'body'),
-	privilegedRequest(TagsController.applyDelta)
-);
-
-/*
-router[ApiEndpoints.analyze.method](
-	`/${ApiEndpoints.analyze.path}`,
-	jwtGuard,
-	validate(documentSchema, 'body'),
-	DictController.analyzeDocument
-);
-*/
 
 export default router;

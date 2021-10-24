@@ -22,7 +22,7 @@ const register = async (
 
 	try {
 		await UserService.register(userDetails, verificationUrl);
-		const response: IApiResponse = {
+		const response: IApiResponse<null> = {
 			status: ApiStatuses.OK,
 			message: 'Registration Successfull!',
 			payload: null,
@@ -43,7 +43,7 @@ const verify = async (
 	try {
 		await UserService.verify(token);
 
-		const response: IApiResponse = {
+		const response: IApiResponse<null> = {
 			status: ApiStatuses.OK,
 			message: 'Account verified!',
 			payload: null,
@@ -69,7 +69,13 @@ const login = async (
 		const response: IApiResponse<ILoginResponseData> = {
 			status: ApiStatuses.OK,
 			message: 'Authentication Succesful!',
-			payload: user,
+			payload: {
+				user: {
+					...user.user,
+					id: Number(user.user.id),
+				},
+				token: user.token,
+			},
 		};
 		res.status(200).json(response);
 	} catch (err) {
@@ -87,7 +93,7 @@ const authenticate = async (
 		const response: IApiResponse<IUserResponseData> = {
 			status: ApiStatuses.OK,
 			message: 'User found',
-			payload: user,
+			payload: { ...user, id: Number(user.id) },
 		};
 		res.status(200).json(response);
 	} catch (err) {

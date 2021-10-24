@@ -53,7 +53,7 @@ const set = async (
 			config: newConfig,
 		});
 
-		let response: IApiResponse = {
+		let response: IApiResponse<null> = {
 			status: ApiStatuses.OK,
 			message: 'Tags found!',
 			payload: null,
@@ -78,7 +78,7 @@ const setActiveLanguage = async (
 			config: { activeLanguage: languageId },
 		});
 
-		let response: IApiResponse = {
+		let response: IApiResponse<null> = {
 			status: ApiStatuses.OK,
 			message: 'Language Set',
 			payload: null,

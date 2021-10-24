@@ -2,18 +2,17 @@ import { Response, NextFunction } from 'express';
 import {
 	IApiResponse,
 	ApiStatuses,
-	IDictionaryDelta,
 	IDictionaryFetchParams,
 	IListDictionaryParams,
 	IListDictionaryResult,
 	IGetManyDictEntriesPrams,
 	IDictionaryEntryFetchResponse,
+	ISearchDictionaryParams,
 } from '../helpers/api';
 import * as DictionaryService from '../services/dictionary.service';
 import { IDictionaryEntry } from '../Document/Dictionary';
 import { IPriviligedRequest } from '../routes';
 import { getUUID, UUID } from '../Document/UUID';
-import DictionaryEntry, { IDictionaryEntryDB } from '../entities/Dictionary';
 
 const list = async (
 	req: IPriviligedRequest<IListDictionaryParams>,
@@ -132,19 +131,18 @@ const getAll = async (
 };
 
 const searchEntries = async (
-	req: IPriviligedRequest,
+	req: IPriviligedRequest<ISearchDictionaryParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const searchTerm = req.params.key as string;
-	const lang = req.params.lang as string;
+	const { key, lang } = req.body;
 	const userId = req.user.id;
 
 	try {
 		const entries = await DictionaryService.find({
 			userId,
 			lang,
-			searchTerm,
+			searchTerm: key,
 		});
 
 		// @TODO WEIRD HACK FOR IMPORTED DICTIONRY REMOVE!!!
@@ -223,51 +221,23 @@ const getEntry = async (
 	}
 };
 
-const applyDelta = async (
-	req: IPriviligedRequest<IDictionaryDelta>,
+const addEntry = async (
+	req: IPriviligedRequest<IDictionaryEntry>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const { removedEntries, updatedEntries, addedEntries } = req.body;
-
+	const entry = req.body;
 	const userId = req.user.id;
 	try {
-		await DictionaryService.remove({ userId, ids: removedEntries });
-		await DictionaryService.create({ userId, entries: addedEntries });
+		const entryId = await DictionaryService.create({
+			userId,
+			entry,
+		});
 
-		for (const updatedEntry of updatedEntries) {
-			await DictionaryService.update({
-				userId,
-				id: updatedEntry.id,
-				newEntry: updatedEntry,
-			});
-		}
-
-		const response: IApiResponse = {
+		const response: IApiResponse<number> = {
 			status: ApiStatuses.OK,
-			message: 'Entrie(s) added successful!',
-			payload: null,
-		};
-		res.status(200).json(response);
-	} catch (err) {
-		next(err);
-	}
-};
-
-const addEntries = async (
-	req: IPriviligedRequest<Array<IDictionaryEntry>>,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	const entries = req.body;
-	const userId = req.user.id;
-	try {
-		DictionaryService.create({ userId, entries });
-
-		const response: IApiResponse = {
-			status: ApiStatuses.OK,
-			message: 'Entrie(s) added successful!',
-			payload: null,
+			message: 'Entry added successful!',
+			payload: entryId,
 		};
 		res.status(200).json(response);
 	} catch (err) {
@@ -284,7 +254,7 @@ const deleteEntry = async (
 	const userId = req.user.id;
 	try {
 		await DictionaryService.remove({ userId, ids: [key] });
-		let response: IApiResponse;
+		let response: IApiResponse<null>;
 
 		response = {
 			status: ApiStatuses.OK,
@@ -368,9 +338,8 @@ const analyzeDocument = async (
 */
 
 export {
-	addEntries,
+	addEntry,
 	deleteEntry,
-	applyDelta,
 	getEntry,
 	searchEntries,
 	list,

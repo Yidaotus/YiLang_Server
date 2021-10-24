@@ -6,12 +6,6 @@ import { validate } from '../middleware/validator';
 import { jwtGuard, privilegedRequest } from '../middleware/auth';
 
 const router = Router();
-const ApiEndpoints = ApiPaths.dict.endpoints;
-
-const documentSchema = Joi.object({
-	lang: Joi.string().required(),
-	document: Joi.string().required(),
-});
 
 const searchEntrySchema = Joi.object({
 	lang: Joi.string().required(),
@@ -19,19 +13,7 @@ const searchEntrySchema = Joi.object({
 });
 
 const getEntrySchema = Joi.object({
-	lang: Joi.string().required(),
-	id: Joi.string()
-		.length(36)
-		.required(),
-});
-
-const getAllSchema = Joi.object({
-	lang: Joi.string().required(),
-});
-
-const getEntriesSchema = Joi.object({
-	ids: Joi.array().items(Joi.string()),
-	lang: Joi.string().required(),
+	id: Joi.string().required(),
 });
 
 const entrySchemaOptional = Joi.object({
@@ -61,7 +43,6 @@ const entrySchemaOptional = Joi.object({
 });
 
 const entrySchema = Joi.object({
-	id: Joi.string().required(),
 	key: Joi.string().required(),
 	translations: Joi.array()
 		.items(Joi.string())
@@ -104,84 +85,39 @@ const listSchema = Joi.object({
 	lang: Joi.string().required(),
 });
 
-const deltaSchema = Joi.object({
-	removedEntries: Joi.array().items(Joi.string()),
-	updatedEntries: Joi.array().items(entrySchemaOptional),
-	addedEntries: Joi.array().items(entrySchema),
-});
-
-const fetchSchema = Joi.object({
-	sortBy: Joi.string()
-		.valid('word', 'translation', 'created')
-		.required(),
-	lang: Joi.string().required(),
-	limit: Joi.number()
-		.valid(1, 10, 25, 50)
-		.optional(),
-	skip: Joi.number().optional(),
-});
-
-router[ApiEndpoints.applyDelta.method](
-	`/${ApiEndpoints.applyDelta.path}`,
+router.post(
+	'/',
 	jwtGuard,
-	validate(deltaSchema, 'body'),
-	privilegedRequest(DictController.applyDelta)
+	validate(entrySchema, 'body'),
+	privilegedRequest(DictController.addEntry)
 );
 
-router[ApiEndpoints.add.method](
-	`/${ApiEndpoints.add.path}`,
-	jwtGuard,
-	validate(Joi.array().items(entrySchema), 'body'),
-	privilegedRequest(DictController.addEntries)
-);
-
-router[ApiEndpoints.delete.method](
-	`/${ApiEndpoints.delete.path}`,
+router.delete(
+	'/',
 	jwtGuard,
 	validate(entrySchema, 'body'),
 	privilegedRequest(DictController.deleteEntry)
 );
 
-router[ApiEndpoints.getAll.method](
-	`/${ApiEndpoints.getAll.path}/:lang`,
+router.post(
+	'/search',
 	jwtGuard,
-	validate(getAllSchema, 'params'),
-	privilegedRequest(DictController.getAll)
-);
-
-router[ApiEndpoints.search.method](
-	`/${ApiEndpoints.search.path}/:lang/:key`,
-	jwtGuard,
-	validate(searchEntrySchema, 'params'),
+	validate(searchEntrySchema, 'body'),
 	privilegedRequest(DictController.searchEntries)
 );
 
-router[ApiEndpoints.list.method](
-	`/${ApiEndpoints.list.path}`,
+router.post(
+	'/list',
 	jwtGuard,
 	validate(listSchema, 'body'),
 	privilegedRequest(DictController.list)
 );
 
-router[ApiEndpoints.getMany.method](
-	`/${ApiEndpoints.getMany.path}`,
-	jwtGuard,
-	validate(getEntriesSchema, 'body'),
-	privilegedRequest(DictController.getMany)
-);
-
-router[ApiEndpoints.get.method](
-	`/${ApiEndpoints.get.path}/:lang/:id`,
+router.get(
+	'/:id',
 	jwtGuard,
 	validate(getEntrySchema, 'params'),
 	privilegedRequest(DictController.getEntry)
-);
-
-router[ApiEndpoints.fetch.method](
-	`/${ApiEndpoints.fetch.path}`,
-	jwtGuard,
-	validate(fetchSchema, 'body'),
-	privilegedRequest(DictController.fetchEntries)
 );
 
 export default router;

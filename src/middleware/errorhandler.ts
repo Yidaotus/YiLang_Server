@@ -22,7 +22,7 @@ const errorHandler = async (
 				status = ApiStatuses.UNAUTHORIZED;
 			}
 		}
-		const response: IApiResponse = {
+		const response: IApiResponse<null> = {
 			status,
 			message,
 			payload: null,

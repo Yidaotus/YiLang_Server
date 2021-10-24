@@ -9,47 +9,34 @@ export type DictionaryEntryField =
 	| 'createdAt'
 	| 'updatedAt';
 
-const ApiStatuses = {
+export const ApiStatuses = {
 	OK: 1,
 	UNAUTHANTICATED: 2,
 	UNAUTHORIZED: 3,
 	INVALIDARGUMENT: 4,
 	ERROR: 5,
 } as const;
-type ApiStatus = typeof ApiStatuses[keyof typeof ApiStatuses];
-export { ApiStatus, ApiStatuses };
+export type ApiStatus = typeof ApiStatuses[keyof typeof ApiStatuses];
 
-type ApiMethod = 'post' | 'put' | 'patch' | 'get' | 'delete';
+export type ApiMethod = 'post' | 'put' | 'patch' | 'get' | 'delete';
 
-interface ApiEndpoint {
+interface IApiEndpoint {
 	path: string;
 	method: ApiMethod;
 }
-interface ApiPath {
+
+interface IApiPath {
 	path: string;
 	endpoints: {
-		[key: string]: ApiEndpoint;
+		[index: string]: IApiEndpoint;
 	};
 }
 
-const ApiPaths: { [key: string]: ApiPath } = {
-	config: {
-		path: 'config',
-		endpoints: {
-			get: {
-				method: 'get',
-				path: '/',
-			},
-			set: {
-				method: 'post',
-				path: '/',
-			},
-			setActiveLanguage: {
-				method: 'post',
-				path: '/activeLanguage',
-			},
-		},
-	},
+interface IApiPaths {
+	[index: string]: IApiPath;
+}
+
+const ApiPaths: IApiPaths = {
 	user: {
 		path: 'user',
 		endpoints: {
@@ -71,6 +58,23 @@ const ApiPaths: { [key: string]: ApiPath } = {
 			},
 		},
 	},
+	config: {
+		path: 'config',
+		endpoints: {
+			get: {
+				method: 'get',
+				path: '',
+			},
+			set: {
+				method: 'post',
+				path: '',
+			},
+			setActiveLanguage: {
+				method: 'post',
+				path: '/activeLanguage',
+			},
+		},
+	},
 	document: {
 		path: 'document',
 		endpoints: {
@@ -82,13 +86,13 @@ const ApiPaths: { [key: string]: ApiPath } = {
 				path: 'entries/list',
 				method: 'post',
 			},
-			getById: {
-				path: 'entries',
-				method: 'get',
-			},
 			remove: {
 				path: 'entries',
 				method: 'delete',
+			},
+			getById: {
+				path: 'entries',
+				method: 'get',
 			},
 		},
 	},
@@ -124,6 +128,10 @@ const ApiPaths: { [key: string]: ApiPath } = {
 				path: 'delta',
 				method: 'post',
 			},
+			list: {
+				path: 'list',
+				method: 'post',
+			},
 			modify: {
 				path: 'entry',
 				method: 'patch',
@@ -131,14 +139,6 @@ const ApiPaths: { [key: string]: ApiPath } = {
 			delete: {
 				path: 'entry',
 				method: 'delete',
-			},
-			getAll: {
-				path: 'entries',
-				method: 'get',
-			},
-			list: {
-				path: 'list',
-				method: 'post',
 			},
 			search: {
 				path: 'search',
@@ -148,9 +148,9 @@ const ApiPaths: { [key: string]: ApiPath } = {
 				path: 'entry',
 				method: 'get',
 			},
-			fetch: {
-				path: 'entry/fetch',
-				method: 'post',
+			getAll: {
+				path: 'entries',
+				method: 'get',
 			},
 			analyze: {
 				path: 'analyze',
@@ -161,6 +161,12 @@ const ApiPaths: { [key: string]: ApiPath } = {
 };
 
 export { ApiPaths };
+
+export enum ApiPathString {
+	LOGIN = 'user/login',
+	REGISTER = 'user/register',
+	AUTH = 'user/auth',
+}
 
 export interface IRegisterParams {
 	username: string;
@@ -178,7 +184,7 @@ export interface ILoginParams {
 }
 
 export interface IUserResponseData {
-	id?: ObjectId;
+	id?: number;
 	email: string;
 	username: string;
 }
@@ -196,10 +202,10 @@ export interface ITokenData {
 	user: IUserData;
 }
 
-export interface IApiResponse<T = null> {
+export interface IApiResponse<T> {
 	status: ApiStatus;
 	message: string;
-	payload: T;
+	payload?: T;
 }
 
 export interface IDictionaryEntryParams {
@@ -208,16 +214,15 @@ export interface IDictionaryEntryParams {
 	lang: string;
 }
 
-export interface IDictionaryDelta {
-	removedEntries: Array<string>;
-	updatedEntries: Array<IDictionaryEntry>;
-	addedEntries: Array<IDictionaryEntry>;
+export interface IFragementData {
+	position: number;
+	entries: IDictionaryEntryData[];
 }
 
-export interface ITagDelta {
-	removedTags: Array<string>;
-	updatedTags: Array<IDictionaryTag>;
-	addedTags: Array<IDictionaryTag>;
+export interface IDictionaryEntryData {
+	word: string;
+	translation: string;
+	lang: string;
 }
 
 export interface IDictionaryFetchParams {
@@ -229,20 +234,23 @@ export interface IDictionaryFetchParams {
 
 export interface IDictionaryEntryFetchResponse {
 	entry: IDictionaryEntry;
+	linkExcerpt: string;
 	rootEntry?: IDictionaryEntry;
 	subEntries: Array<IDictionaryEntry>;
-	linkExcerpt: string;
 	otherExcerpts?: Array<IExcerptedDocumentLink>;
 }
 
-export interface IGetManyDictEntriesPrams {
+export interface IAddTagParams {
 	lang: string;
-	ids: Array<string>;
+	tag: Omit<IDictionaryTag, 'id' | 'lang'>;
 }
 
-export interface IGetManyTagsPrams {
+export type IAddDictionaryEntryParams = Omit<IDictionaryEntry, 'id'>;
+export type IAddDictionaryTagParams = Omit<IDictionaryTag, 'id'>;
+
+export interface IDocumentParam {
+	document: string;
 	lang: string;
-	ids: Array<string>;
 }
 
 export interface IListDocumentsParams {
@@ -253,12 +261,30 @@ export interface IListDocumentsParams {
 	lang: string;
 }
 
+export interface IGetManyDictEntriesPrams {
+	lang: string;
+	ids: Array<string>;
+}
+
+export interface IDocumentExcerpt {
+	id: UUID;
+	title: string;
+	excerpt: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+export interface IListDocumentResult {
+	total: number;
+	excerpts: Array<IDocumentExcerpt>;
+}
+
+export interface IListDictionaryResult {
+	total: number;
+	entries: Array<IDictionaryEntry>;
+}
 export interface IListDictionaryParams {
-	sortBy: {
-		key: keyof Pick<
-			IDictionaryEntry,
-			'comment' | 'key' | 'spelling' | 'translations'
-		>;
+	sortBy?: {
+		key: string;
 		order: 'ascend' | 'descend';
 	};
 	filter?: {
@@ -273,21 +299,14 @@ export interface IListDictionaryParams {
 	lang: string;
 }
 
-export interface IDocumentExcerpt {
-	id: string;
-	title: string;
-	excerpt: string;
-	createdAt: Date;
-	updatedAt: Date;
-}
-export interface IListDocumentResult {
-	total: number;
-	excerpts: Array<IDocumentExcerpt>;
+export interface IGetManyTagsPrams {
+	lang: string;
+	ids: Array<UUID>;
 }
 
-export interface IListDictionaryResult {
-	total: number;
-	entries: Array<IDictionaryEntry>;
+export interface ISearchDictionaryParams {
+	lang: string;
+	key: string;
 }
 
 export interface ISetActiveLangParams {

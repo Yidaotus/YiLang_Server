@@ -48,17 +48,13 @@ const remove = async ({
 
 const create = async ({
 	userId,
-	tags,
+	tag,
 }: {
 	userId: Schema.Types.ObjectId;
-	tags: Array<IDictionaryTag>;
-}) => {
-	const tagsToInsert = tags.map((tag) => ({
-		...tag,
-		userId,
-	}));
-
-	await DictionaryTag.create(tagsToInsert);
+	tag: Omit<IDictionaryTag, 'id'>;
+}): Promise<string> => {
+	const createdTag = await DictionaryTag.create({ userId, ...tag });
+	return createdTag.id;
 };
 
 const update = async ({
