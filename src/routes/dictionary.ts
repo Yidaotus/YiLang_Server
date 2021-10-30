@@ -12,7 +12,7 @@ const searchEntrySchema = Joi.object({
 	key: Joi.string().required(),
 });
 
-const getEntrySchema = Joi.object({
+const entryIdSchema = Joi.object({
 	id: Joi.string().required(),
 });
 
@@ -93,9 +93,9 @@ router.post(
 );
 
 router.delete(
-	'/',
+	'/:id',
 	jwtGuard,
-	validate(entrySchema, 'body'),
+	validate(entryIdSchema, 'params'),
 	privilegedRequest(DictController.deleteEntry)
 );
 
@@ -113,10 +113,17 @@ router.post(
 	privilegedRequest(DictController.list)
 );
 
+router.post(
+	'/:id',
+	jwtGuard,
+	validate(entrySchema, 'body'),
+	privilegedRequest(DictController.updateEntry)
+);
+
 router.get(
 	'/:id',
 	jwtGuard,
-	validate(getEntrySchema, 'params'),
+	validate(entryIdSchema, 'params'),
 	privilegedRequest(DictController.getEntry)
 );
 

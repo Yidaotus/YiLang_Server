@@ -116,16 +116,15 @@ const findOccurances = async ({
 
 const remove = async ({
 	userId,
-	ids,
+	id,
 }: {
 	userId: Schema.Types.ObjectId;
-	ids: Array<string>;
+	id: string;
 }) => {
-	await DictionaryEntry.deleteMany({
+	await DictionaryEntry.deleteOne({
+		_id: id,
 		userId,
-	})
-		.in('id', ids)
-		.exec();
+	}).exec();
 };
 
 const create = async ({
@@ -155,7 +154,7 @@ const update = async ({
 	id: string;
 	newEntry: IDictionaryEntry;
 }) => {
-	await DictionaryEntry.updateOne({ id: id, userId }, { ...newEntry });
+	await DictionaryEntry.updateOne({ _id: id, userId }, { ...newEntry });
 };
 
 const get = async ({

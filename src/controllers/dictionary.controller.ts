@@ -161,6 +161,31 @@ const getEntry = async (
 		next(err);
 	}
 };
+const updateEntry = async (
+	req: IPriviligedRequest<IDictionaryEntry>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const entry = req.body;
+	const entryId = req.params.id;
+	const userId = req.user.id;
+	try {
+		await DictionaryService.update({
+			userId,
+			id: entryId,
+			newEntry: entry,
+		});
+
+		const response: IApiResponse<null> = {
+			status: ApiStatuses.OK,
+			message: 'Entry added successful!',
+			payload: null,
+		};
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
 
 const addEntry = async (
 	req: IPriviligedRequest<IDictionaryEntry>,
@@ -191,10 +216,10 @@ const deleteEntry = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const key = req.params.key as string;
+	const id = req.params.id;
 	const userId = req.user.id;
 	try {
-		await DictionaryService.remove({ userId, ids: [key] });
+		await DictionaryService.remove({ userId, id });
 		let response: IApiResponse<null>;
 
 		response = {
@@ -286,4 +311,5 @@ export {
 	list,
 	getAll,
 	fetchEntries,
+	updateEntry,
 };
