@@ -218,7 +218,6 @@ const update = async (
 	try {
 		await ConfigService.update({
 			userId,
-			id,
 			config: newConfig,
 		});
 
@@ -241,11 +240,9 @@ const setActiveLanguage = async (
 ): Promise<void> => {
 	const userId = req.user.id;
 	const { languageId } = req.body;
-	const { id } = req.params;
 	try {
 		await ConfigService.update({
 			userId,
-			id,
 			config: { activeLanguage: languageId },
 		});
 

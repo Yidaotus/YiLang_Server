@@ -31,6 +31,16 @@ const LanguageConfigSchema = new Schema<ILanguageConfig>({
 	lookupSources: { type: [DictionaryLookupSourceSchema], required: false },
 });
 
+LanguageConfigSchema.index({ name: 1 });
+LanguageConfigSchema.set('toJSON', {
+	virtuals: true,
+	versionKey: false,
+	transform: function(_: unknown, ret: IConfigDocument) {
+		ret.id = ret._id;
+		delete ret._id;
+	},
+});
+
 const ConfigSchema = new Schema<IConfigDocument, IConfigModel>(
 	{
 		languageConfigs: { type: [LanguageConfigSchema], require: false },
@@ -47,6 +57,7 @@ ConfigSchema.set('toJSON', {
 	virtuals: true,
 	versionKey: false,
 	transform: function(_: unknown, ret: IConfigDocument) {
+		ret.id = ret._id;
 		delete ret._id;
 		delete ret.userId;
 		delete ret.deletedAt;

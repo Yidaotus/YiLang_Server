@@ -19,6 +19,12 @@ router.delete(
 );
 
 router.post(
+	'/language/:id',
+	jwtGuard,
+	privilegedRequest(ConfigController.updateLanguage)
+);
+
+router.post(
 	'/language',
 	jwtGuard,
 	privilegedRequest(ConfigController.addLanguage)
@@ -33,7 +39,7 @@ router.post('/new', jwtGuard, privilegedRequest(ConfigController.create));
 router.post('/', jwtGuard, privilegedRequest(ConfigController.update));
 
 router.post(
-	'/active',
+	'/activeLanguage',
 	jwtGuard,
 	privilegedRequest(ConfigController.setActiveLanguage)
 );

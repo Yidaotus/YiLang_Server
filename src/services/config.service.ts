@@ -14,6 +14,7 @@ const addLanguage = async ({
 	}).exec();
 	const newLanguageConfig = config.languageConfigs.create(languageConf);
 	config.languageConfigs.push(newLanguageConfig);
+	await config.validate();
 	config.save();
 	return newLanguageConfig.id as string;
 };
@@ -30,6 +31,7 @@ const removeLanguage = async ({
 	}).exec();
 	const currentConfig = config.languageConfigs.id(languageId);
 	currentConfig.remove();
+	await config.validate();
 	config.save();
 };
 
@@ -51,6 +53,7 @@ const updateLanguage = async ({
 		...languageConf,
 	});
 	currentConfig.save();
+	await config.validate();
 	config.save();
 };
 
@@ -101,14 +104,12 @@ const create = async ({
 
 const update = async ({
 	userId,
-	id,
 	config,
 }: {
 	userId: Schema.Types.ObjectId;
-	id: string;
-	config: Partial<IConfig>;
+	config: Omit<Partial<IConfig>, 'languageConfigs'>;
 }): Promise<void> => {
-	await Config.updateOne({ userId, _id: id, config });
+	await Config.updateOne({ userId }, { ...config });
 };
 
 export {
