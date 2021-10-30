@@ -6,20 +6,34 @@ import { jwtGuard, privilegedRequest } from '../middleware/auth';
 const router = Router();
 const ApiEndpoints = ApiPaths.config.endpoints;
 
-router[ApiEndpoints.get.method](
-	ApiEndpoints.get.path,
+router.get(
+	'/language/:id',
 	jwtGuard,
-	privilegedRequest(ConfigController.get)
+	privilegedRequest(ConfigController.getLanguage)
 );
 
-router[ApiEndpoints.set.method](
-	ApiEndpoints.set.path,
+router.delete(
+	'/language/:id',
 	jwtGuard,
-	privilegedRequest(ConfigController.set)
+	privilegedRequest(ConfigController.removeLanguage)
 );
 
-router[ApiEndpoints.setActiveLanguage.method](
-	ApiEndpoints.setActiveLanguage.path,
+router.post(
+	'/language',
+	jwtGuard,
+	privilegedRequest(ConfigController.addLanguage)
+);
+
+router.get('/', jwtGuard, privilegedRequest(ConfigController.get));
+
+router.delete('/', jwtGuard, privilegedRequest(ConfigController.remove));
+
+router.post('/new', jwtGuard, privilegedRequest(ConfigController.create));
+
+router.post('/', jwtGuard, privilegedRequest(ConfigController.update));
+
+router.post(
+	'/active',
 	jwtGuard,
 	privilegedRequest(ConfigController.setActiveLanguage)
 );

@@ -9,6 +9,60 @@ import { IDictionaryTag } from '../Document/Dictionary';
 import { IPriviligedRequest } from '../routes';
 import * as TagService from '../services/tags.service';
 
+const remove = async (
+	req: IPriviligedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	try {
+		const id = req.query.id as string;
+		const newTagId = await TagService.remove({
+			userId,
+			id,
+		});
+
+		let response: IApiResponse<null>;
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Tag created!',
+			payload: null,
+		};
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const update = async (
+	req: IPriviligedRequest<IAddDictionaryTagParams>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	try {
+		const tag = req.body;
+		const id = req.query.id as string;
+		const newTagId = await TagService.update({
+			userId,
+			id,
+			newTag: tag,
+		});
+
+		let response: IApiResponse<null>;
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Tag created!',
+			payload: null,
+		};
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
 const add = async (
 	req: IPriviligedRequest<IAddDictionaryTagParams>,
 	res: Response,
@@ -104,4 +158,4 @@ const getAll = async (
 	}
 };
 
-export { getAll, getMany, add };
+export { getAll, getMany, add, update, remove };

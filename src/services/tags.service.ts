@@ -33,16 +33,15 @@ const getAllByLanguage = async ({
 
 const remove = async ({
 	userId,
-	ids,
+	id,
 }: {
 	userId: Schema.Types.ObjectId;
-	ids: Array<string>;
+	id: string;
 }) => {
-	await DictionaryTag.deleteMany({
+	await DictionaryTag.deleteOne({
 		userId,
-	})
-		.in('id', ids)
-		.exec();
+		_id: id,
+	}).exec();
 };
 
 const create = async ({
@@ -63,7 +62,7 @@ const update = async ({
 }: {
 	userId: Schema.Types.ObjectId;
 	id: string;
-	newTag: IDictionaryTag;
+	newTag: Omit<IDictionaryTag, 'id'>;
 }) => {
 	await DictionaryTag.updateOne({ id: id, userId }, { ...newTag });
 };

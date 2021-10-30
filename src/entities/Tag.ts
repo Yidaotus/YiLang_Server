@@ -29,7 +29,6 @@ const DictionaryTagSchema = new Schema<
 		name: { type: String, required: true },
 		color: { type: String, required: false },
 		grammarPoint: { type: GrammarPointSchema, required: false },
-		id: { type: String, required: true },
 		lang: { type: String, required: true },
 		userId: { type: Schema.Types.ObjectId, require: true },
 		createdAt: Date,

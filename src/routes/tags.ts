@@ -17,8 +17,11 @@ const getEntriesSchema = Joi.object({
 		.required(),
 });
 
-const tagSchema = Joi.object({
+const tagIdSchema = Joi.object({
 	id: Joi.string().required(),
+});
+
+const tagSchema = Joi.object({
 	name: Joi.string(),
 	lang: Joi.string().required(),
 	color: Joi.string()
@@ -52,6 +55,20 @@ router.post(
 	jwtGuard,
 	validate(tagSchema, 'body'),
 	privilegedRequest(TagsController.add)
+);
+
+router.post(
+	'/:id',
+	jwtGuard,
+	validate(tagSchema, 'body'),
+	privilegedRequest(TagsController.update)
+);
+
+router.delete(
+	'/:id',
+	jwtGuard,
+	validate(tagIdSchema, 'params'),
+	privilegedRequest(TagsController.remove)
 );
 
 router.get(

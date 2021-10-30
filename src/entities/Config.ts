@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import {
 	IConfig,
 	ILanguageConfig,
@@ -8,6 +8,7 @@ import {
 export interface IConfigDB extends IConfig {
 	_id: String;
 	userId: Schema.Types.ObjectId;
+	languageConfigs: Types.DocumentArray<ILanguageConfig & Types.Subdocument>;
 	createdAt: Date;
 	updatedAt: Date;
 	deletedAt: Date;
@@ -26,9 +27,7 @@ const DictionaryLookupSourceSchema = new Schema<IDictionaryLookupSource>(
 );
 
 const LanguageConfigSchema = new Schema<ILanguageConfig>({
-	key: { type: String, required: true },
 	name: { type: String, required: true },
-	default: { type: String, required: true },
 	lookupSources: { type: [DictionaryLookupSourceSchema], required: false },
 });
 
