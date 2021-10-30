@@ -7,7 +7,6 @@ import {
 import { IPriviligedRequest } from '../routes';
 import * as ConfigService from '../services/config.service';
 import { IConfig } from '../Document/Config';
-import { UUID } from '../Document/UUID';
 
 const get = async (
 	req: IPriviligedRequest,

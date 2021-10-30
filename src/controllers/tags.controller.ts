@@ -8,7 +8,6 @@ import {
 import { IDictionaryTag } from '../Document/Dictionary';
 import { IPriviligedRequest } from '../routes';
 import * as TagService from '../services/tags.service';
-import { UUID } from '../Document/UUID';
 
 const add = async (
 	req: IPriviligedRequest<IAddDictionaryTagParams>,
@@ -47,7 +46,7 @@ const getMany = async (
 		//await UserService.register(userDetails, verificationUrl);
 		const entries: IDictionaryTag[] = await TagService.get({
 			userId,
-			ids: ids as Array<UUID>,
+			ids: ids as Array<string>,
 		});
 		let response: IApiResponse<IDictionaryTag[]>;
 		if (entries.length > 0) {

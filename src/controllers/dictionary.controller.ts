@@ -10,7 +10,6 @@ import {
 import * as DictionaryService from '../services/dictionary.service';
 import { IDictionaryEntry } from '../Document/Dictionary';
 import { IPriviligedRequest } from '../routes';
-import { getUUID, UUID } from '../Document/UUID';
 
 const list = async (
 	req: IPriviligedRequest<IListDictionaryParams>,
@@ -100,14 +99,6 @@ const searchEntries = async (
 			lang,
 			searchTerm: key,
 		});
-
-		// @TODO WEIRD HACK FOR IMPORTED DICTIONRY REMOVE!!!
-		for (const foundEntry of entries) {
-			if (!foundEntry.id) {
-				foundEntry.id = getUUID();
-				foundEntry.save();
-			}
-		}
 
 		let response: IApiResponse<Array<IDictionaryEntry>>;
 		if (entries && entries.length > 0) {

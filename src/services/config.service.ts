@@ -1,6 +1,5 @@
 import { Schema } from 'mongoose';
 import { IConfig } from '../Document/Config';
-import { UUID } from '../Document/UUID';
 import Config from '../entities/Config';
 
 const get = async ({

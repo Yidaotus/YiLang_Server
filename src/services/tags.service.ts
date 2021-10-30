@@ -1,6 +1,5 @@
 import { Schema } from 'mongoose';
 import { IDictionaryTag } from '../Document/Dictionary';
-import { UUID } from '../Document/UUID';
 import DictionaryTag from '../entities/Tag';
 
 const get = async ({
@@ -8,7 +7,7 @@ const get = async ({
 	ids,
 }: {
 	userId: Schema.Types.ObjectId;
-	ids: Array<UUID>;
+	ids: Array<string>;
 }): Promise<Array<IDictionaryTag>> => {
 	const entries: IDictionaryTag[] = await DictionaryTag.find({
 		userId,
@@ -63,7 +62,7 @@ const update = async ({
 	newTag,
 }: {
 	userId: Schema.Types.ObjectId;
-	id: UUID;
+	id: string;
 	newTag: IDictionaryTag;
 }) => {
 	await DictionaryTag.updateOne({ id: id, userId }, { ...newTag });

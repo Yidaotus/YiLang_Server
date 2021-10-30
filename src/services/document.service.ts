@@ -1,7 +1,6 @@
 import { Schema } from 'mongoose';
 import { BlockType } from '../Document/Block';
 import { IDocument } from '../Document/Document';
-import { UUID } from '../Document/UUID';
 import DocumentModel from '../entities/Document';
 import { IDocumentExcerpt, IListDocumentsParams } from '../helpers/api';
 
@@ -74,7 +73,7 @@ const get = async ({
 	id,
 }: {
 	userId: Schema.Types.ObjectId;
-	id: UUID;
+	id: string;
 }) => {
 	const document = await DocumentModel.findOne({
 		id,
@@ -88,7 +87,7 @@ const remove = async ({
 	id,
 }: {
 	userId: Schema.Types.ObjectId;
-	id: UUID;
+	id: string;
 }) => {
 	const document = await DocumentModel.deleteOne({
 		id,
@@ -102,7 +101,7 @@ const saveOrUpdate = async ({
 	newDocument,
 }: {
 	userId: Schema.Types.ObjectId;
-	id: UUID;
+	id: string;
 	newDocument: IDocument;
 }) => {
 	await DocumentModel.updateOne({ userId, id: newDocument.id }, newDocument, {

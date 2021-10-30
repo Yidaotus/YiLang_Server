@@ -8,7 +8,6 @@ import {
 } from '../helpers/api';
 import { IPriviligedRequest } from '../routes';
 import * as DocumentService from '../services/document.service';
-import { UUID } from '../Document/UUID';
 
 const saveOrUpdateDocument = async (
 	req: IPriviligedRequest<IDocument>,
@@ -79,7 +78,7 @@ const getDocument = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id as UUID;
+	const id = req.params.id;
 	const userId = req.user.id;
 	try {
 		//await UserService.register(userDetails, verificationUrl);
@@ -114,7 +113,7 @@ const removeDocument = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id as UUID;
+	const id = req.params.id;
 	const userId = req.user.id;
 	try {
 		//await UserService.register(userDetails, verificationUrl);

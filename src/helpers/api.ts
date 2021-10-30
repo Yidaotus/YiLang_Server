@@ -1,6 +1,5 @@
 import { IDictionaryEntry, IDictionaryTag } from '../Document/Dictionary';
 import { IExcerptedDocumentLink } from '../Document/Document';
-import { UUID } from '../Document/UUID';
 
 export type DictionaryEntryField =
 	| 'word'
@@ -262,7 +261,7 @@ export interface IGetManyDictEntriesPrams {
 }
 
 export interface IDocumentExcerpt {
-	id: UUID;
+	id: string;
 	title: string;
 	excerpt: string;
 	createdAt: Date;
@@ -296,7 +295,7 @@ export interface IListDictionaryParams {
 
 export interface IGetManyTagsPrams {
 	lang: string;
-	ids: Array<UUID>;
+	ids: Array<string>;
 }
 
 export interface ISearchDictionaryParams {
@@ -305,5 +304,5 @@ export interface ISearchDictionaryParams {
 }
 
 export interface ISetActiveLangParams {
-	languageId: UUID;
+	languageId: string;
 }
