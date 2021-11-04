@@ -27,7 +27,7 @@ const getAllForWord = async ({
 	wordId: string;
 }): Promise<Array<IDictionarySentence>> => {
 	const junctions = await SentenceWord.find({
-		wordId,
+		sentenceId: wordId,
 		userId,
 	});
 	const sentenceIds = junctions.map(({ sentenceId }) => sentenceId);
