@@ -1,9 +1,9 @@
 import DictionaryEntry, { IDictionaryEntryDB } from '../entities/Dictionary';
 import { Schema } from 'mongoose';
-import * as radix from '../helpers/Radix';
 import { DictionaryEntryField, IListDictionaryParams } from '../helpers/api';
 import { IDictionaryEntry } from '../Document/Dictionary';
 import { IExcerptedDocumentLink } from '../Document/Document';
+import SentenceWord from '../entities/SentenceWord';
 
 const fetch = async ({
 	sortBy,
@@ -14,19 +14,41 @@ const fetch = async ({
 }: {
 	sortBy: DictionaryEntryField;
 	lang: string;
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	limit: number;
 	skip: number;
-}): Promise<IDictionaryEntryDB[]> => {
-	const entries: IDictionaryEntryDB[] = await DictionaryEntry.find({
+}): Promise<IDictionaryEntry[]> => {
+	const entries = await DictionaryEntry.find({
 		lang,
 		userId,
 	})
 		.sort(sortBy)
 		.limit(limit)
 		.skip(skip)
+		.lean<Array<IDictionaryEntry>>()
 		.exec();
 
+	return entries;
+};
+
+const getAllForSentence = async ({
+	userId,
+	sentenceId,
+}: {
+	userId: string;
+	sentenceId: string;
+}): Promise<Array<IDictionaryEntry>> => {
+	const junctions = await SentenceWord.find({
+		sentenceId,
+		userId,
+	});
+	const wordIds = junctions.map(({ sentenceId }) => sentenceId);
+	const entries: IDictionaryEntry[] = await DictionaryEntry.find({
+		userId,
+	})
+		.in('id', wordIds)
+		.lean<Array<IDictionaryEntry>>()
+		.exec();
 	return entries;
 };
 
@@ -37,7 +59,7 @@ const listEntries = async ({
 	lang,
 	userId,
 	filter,
-}: IListDictionaryParams & { userId: Schema.Types.ObjectId }) => {
+}: IListDictionaryParams & { userId: string }) => {
 	let entriesQueryCreator = DictionaryEntry.find({
 		userId,
 		lang,
@@ -66,17 +88,19 @@ const listEntries = async ({
 	const entries = await new entriesQuery()
 		.limit(limit)
 		.skip(skip)
+		.lean<Array<IDictionaryEntry>>()
 		.exec();
 	return { total, entries };
 };
 
+/*
 const findOccurances = async ({
 	lang,
 	userId,
 	document,
 }: {
 	lang: string;
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	document: string;
 }) => {
 	const dictionary = await DictionaryEntry.find({
@@ -84,10 +108,10 @@ const findOccurances = async ({
 		userId,
 	});
 
-	let rootRadix: radix.IRadixNode<IDictionaryEntryDB> = {
+	let rootRadix: radix.IRadixNode<IDictionaryEntry> = {
 		value: null,
 		key: '',
-		edges: new Array<radix.IRadixEdge<IDictionaryEntryDB>>(),
+		edges: new Array<radix.IRadixEdge<IDictionaryEntry>>(),
 	};
 
 	for (const entry of dictionary) {
@@ -113,14 +137,9 @@ const findOccurances = async ({
 
 	return occurances;
 };
+*/
 
-const remove = async ({
-	userId,
-	id,
-}: {
-	userId: Schema.Types.ObjectId;
-	id: string;
-}) => {
+const remove = async ({ userId, id }: { userId: string; id: string }) => {
 	await DictionaryEntry.deleteOne({
 		_id: id,
 		userId,
@@ -131,7 +150,7 @@ const create = async ({
 	userId,
 	entry,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	entry: IDictionaryEntry;
 }): Promise<number> => {
 	try {
@@ -150,7 +169,7 @@ const update = async ({
 	id,
 	newEntry,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	id: string;
 	newEntry: IDictionaryEntry;
 }) => {
@@ -161,13 +180,15 @@ const get = async ({
 	userId,
 	id,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	id: string;
 }): Promise<IDictionaryEntry> => {
 	const entry = await DictionaryEntry.findOne({
 		_id: id,
 		userId,
-	}).exec();
+	})
+		.lean<IDictionaryEntry>()
+		.exec();
 	return entry;
 };
 
@@ -314,7 +335,7 @@ const find = async ({
 	lang,
 	searchTerm,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	lang: string;
 	searchTerm: string;
 }) => {
@@ -322,17 +343,19 @@ const find = async ({
 		key: new RegExp(`.*${searchTerm}.*`, 'gi'),
 		lang,
 		userId,
-	}).exec();
+	})
+		.lean<Array<IDictionaryEntry>>()
+		.exec();
 	return entries;
 };
 
 export {
 	fetch,
-	findOccurances,
 	listEntries,
 	remove,
 	create,
 	update,
 	get,
+	getAllForSentence,
 	find,
 };

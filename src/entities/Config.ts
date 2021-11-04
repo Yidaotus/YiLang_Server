@@ -5,10 +5,11 @@ import {
 	IDictionaryLookupSource,
 } from '../Document/Config';
 
-export interface IConfigDB extends IConfig {
-	_id: String;
-	userId: Schema.Types.ObjectId;
+export interface IConfigDB extends Omit<IConfig, 'activeLanguage'> {
+	_id: Types.ObjectId;
+	userId: Types.ObjectId;
 	languageConfigs: Types.DocumentArray<ILanguageConfig & Types.Subdocument>;
+	activeLanguage: Types.ObjectId;
 	createdAt: Date;
 	updatedAt: Date;
 	deletedAt: Date;
@@ -44,8 +45,8 @@ LanguageConfigSchema.set('toJSON', {
 const ConfigSchema = new Schema<IConfigDocument, IConfigModel>(
 	{
 		languageConfigs: { type: [LanguageConfigSchema], require: false },
-		activeLanguage: { type: String, require: false },
-		userId: { type: Schema.Types.ObjectId, require: true },
+		activeLanguage: { type: Types.ObjectId, require: false },
+		userId: { type: Types.ObjectId, require: true },
 		createdAt: Date,
 		updatedAt: Date,
 		deletedAt: Date,

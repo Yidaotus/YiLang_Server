@@ -1,4 +1,3 @@
-import { Schema } from 'mongoose';
 import { IDictionaryTag } from '../Document/Dictionary';
 import DictionaryTag from '../entities/Tag';
 
@@ -6,7 +5,7 @@ const get = async ({
 	userId,
 	ids,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	ids: Array<string>;
 }): Promise<Array<IDictionaryTag>> => {
 	const entries: IDictionaryTag[] = await DictionaryTag.find({
@@ -21,7 +20,7 @@ const getAllByLanguage = async ({
 	userId,
 	lang,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	lang: string;
 }): Promise<Array<IDictionaryTag>> => {
 	const entries: IDictionaryTag[] = await DictionaryTag.find({
@@ -31,13 +30,7 @@ const getAllByLanguage = async ({
 	return entries;
 };
 
-const remove = async ({
-	userId,
-	id,
-}: {
-	userId: Schema.Types.ObjectId;
-	id: string;
-}) => {
+const remove = async ({ userId, id }: { userId: string; id: string }) => {
 	await DictionaryTag.deleteOne({
 		userId,
 		_id: id,
@@ -48,7 +41,7 @@ const create = async ({
 	userId,
 	tag,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	tag: Omit<IDictionaryTag, 'id'>;
 }): Promise<string> => {
 	const createdTag = await DictionaryTag.create({ userId, ...tag });
@@ -60,7 +53,7 @@ const update = async ({
 	id,
 	newTag,
 }: {
-	userId: Schema.Types.ObjectId;
+	userId: string;
 	id: string;
 	newTag: Omit<IDictionaryTag, 'id'>;
 }) => {

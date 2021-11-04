@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { IDocument } from '../Document/Document';
+import { IDocumentSerialized } from '../Document/Document';
 import {
 	IApiResponse,
 	ApiStatuses,
@@ -9,8 +9,8 @@ import {
 import { IPriviligedRequest } from '../routes';
 import * as DocumentService from '../services/document.service';
 
-const saveOrUpdateDocument = async (
-	req: IPriviligedRequest<IDocument>,
+const createDocument = async (
+	req: IPriviligedRequest<Omit<IDocumentSerialized, 'id'>>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -18,9 +18,35 @@ const saveOrUpdateDocument = async (
 	const userId = req.user.id;
 
 	try {
-		await DocumentService.saveOrUpdate({
+		const documentId = await DocumentService.create({
 			userId,
-			id: newDocument.id,
+			newDocument,
+		});
+
+		const response: IApiResponse<string> = {
+			status: ApiStatuses.OK,
+			message: 'Document saved successful!',
+			payload: documentId,
+		};
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const updateDocument = async (
+	req: IPriviligedRequest<Omit<IDocumentSerialized, 'id'>>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const id = req.params.id;
+	const newDocument = req.body;
+	const userId = req.user.id;
+
+	try {
+		await DocumentService.update({
+			userId,
+			id,
 			newDocument,
 		});
 
@@ -87,7 +113,7 @@ const getDocument = async (
 			userId,
 		});
 
-		let response: IApiResponse<IDocument | null>;
+		let response: IApiResponse<IDocumentSerialized | null>;
 		if (document) {
 			response = {
 				status: ApiStatuses.OK,
@@ -135,8 +161,9 @@ const removeDocument = async (
 };
 
 export {
-	saveOrUpdateDocument as saveDocument,
 	getDocument,
 	listDocuments,
 	removeDocument,
+	createDocument,
+	updateDocument,
 };

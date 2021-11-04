@@ -1,9 +1,9 @@
-import mongoose, { Schema, Document, Model, ObjectId } from 'mongoose';
+import mongoose, { Schema, Document, Model, ObjectId, Types } from 'mongoose';
 import { IDictionaryTag, IGrammarPoint } from '../Document/Dictionary';
 
 export interface IDictionaryTagDB extends IDictionaryTag {
 	_id: String;
-	userId: Schema.Types.ObjectId;
+	userId: Types.ObjectId;
 	createdAt: Date;
 	updatedAt: Date;
 	deletedAt: Date;
@@ -30,7 +30,7 @@ const DictionaryTagSchema = new Schema<
 		color: { type: String, required: false },
 		grammarPoint: { type: GrammarPointSchema, required: false },
 		lang: { type: String, required: true },
-		userId: { type: Schema.Types.ObjectId, require: true },
+		userId: { type: Types.ObjectId, require: true },
 		createdAt: Date,
 		updatedAt: Date,
 		deletedAt: Date,

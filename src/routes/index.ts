@@ -4,6 +4,8 @@ import DictRouter from './dictionary';
 import DocumentRouter from './document';
 import ConfigRouter from './config';
 import TagsRouter from './tags';
+import SentencesRouter from './sentences';
+import SentenceWordRouter from './sentenceWord';
 import { ITokenData, ApiPaths } from '../helpers/api';
 import { IUser } from '../entities/user';
 
@@ -22,6 +24,8 @@ router.use('/user', UserRouter);
 router.use('/dictionary/entries', DictRouter);
 router.use('/documents', DocumentRouter);
 router.use('/dictionary/tags', TagsRouter);
+router.use('/dictionary/sentences', SentencesRouter);
+router.use('/dictionary/sentenceword', SentenceWordRouter);
 router.use('/config', ConfigRouter);
 
 export default router;

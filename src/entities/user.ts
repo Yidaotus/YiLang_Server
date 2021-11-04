@@ -8,7 +8,7 @@ interface IVerificationToken {
 }
 
 export interface IUser {
-	id: ObjectId;
+	id: string;
 	email: string;
 	password: string;
 	username: string;
