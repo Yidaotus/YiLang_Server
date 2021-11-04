@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model, ObjectId, Types } from 'mongoose';
 import { IDictionaryTag, IGrammarPoint } from '../Document/Dictionary';
 
 export interface IDictionaryTagDB extends IDictionaryTag {
-	_id: String;
+	_id: Types.ObjectId;
 	userId: Types.ObjectId;
 	createdAt: Date;
 	updatedAt: Date;
