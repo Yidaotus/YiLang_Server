@@ -3,15 +3,18 @@ import SentenceWord from '../entities/SentenceWord';
 
 const link = async ({
 	userId,
+	langId,
 	wordId,
 	sentenceId,
 }: {
 	userId: string;
+	langId: string;
 	wordId: string;
 	sentenceId: string;
 }): Promise<IDictionarySentence> => {
 	const sentenceWordId = await SentenceWord.create({
 		userId,
+		langId,
 		sentenceId,
 		wordId,
 	});
@@ -20,15 +23,18 @@ const link = async ({
 
 const unlink = async ({
 	userId,
+	langId,
 	wordId,
 	sentenceId,
 }: {
 	userId: string;
+	langId: string;
 	wordId: string;
 	sentenceId: string;
 }): Promise<void> => {
 	await SentenceWord.findOneAndDelete({
 		userId,
+		langId,
 		sentenceId,
 		wordId,
 	});

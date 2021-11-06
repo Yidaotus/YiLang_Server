@@ -3,28 +3,17 @@ import * as SentenceController from '../controllers/sentence.controller';
 import Joi from 'joi';
 import { validate } from '../middleware/validator';
 import { jwtGuard, privilegedRequest } from '../middleware/auth';
+import { ObjectIdSchema } from './schemas';
 
-const router = Router();
-
-const getByLanguage = Joi.object({
-	lang: Joi.string().required(),
-});
-
-const getEntriesSchema = Joi.object({
-	lang: Joi.string().required(),
-	ids: Joi.array()
-		.items(Joi.string())
-		.required(),
-});
+const router = Router({ mergeParams: true });
 
 const tagIdSchema = Joi.object({
-	id: Joi.string().required(),
+	id: ObjectIdSchema,
 });
 
 const sentenceSchema = Joi.object({
 	content: Joi.string().required(),
 	translation: Joi.string().required(),
-	lang: Joi.string().required(),
 	source: Joi.object().optional(),
 });
 
@@ -38,7 +27,6 @@ const fetchSchema = Joi.object({
 	sortBy: Joi.string()
 		.valid('word', 'translation', 'created')
 		.required(),
-	lang: Joi.string().required(),
 	limit: Joi.number()
 		.valid(1, 10, 25, 50)
 		.optional(),
@@ -67,16 +55,14 @@ router.delete(
 );
 
 router.get(
-	'/byLanguage/:lang',
+	'/all',
 	jwtGuard,
-	validate(getByLanguage, 'params'),
 	privilegedRequest(SentenceController.getAllByLanguage)
 );
 
 router.get(
 	'/byWord/:wordId',
 	jwtGuard,
-	validate(getByLanguage, 'params'),
 	privilegedRequest(SentenceController.getAllForWord)
 );
 

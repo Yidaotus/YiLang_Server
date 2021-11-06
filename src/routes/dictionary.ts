@@ -3,16 +3,20 @@ import * as DictController from '../controllers/dictionary.controller';
 import Joi from 'joi';
 import { validate } from '../middleware/validator';
 import { jwtGuard, privilegedRequest } from '../middleware/auth';
+import { ObjectIdSchema } from './schemas';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 const searchEntrySchema = Joi.object({
-	lang: Joi.string().required(),
 	key: Joi.string().required(),
 });
 
 const entryIdSchema = Joi.object({
 	id: Joi.string().required(),
+});
+
+const getEntryIdSchema = Joi.object({
+	id: ObjectIdSchema,
 });
 
 const entrySchemaOptional = Joi.object({
@@ -46,7 +50,6 @@ const entrySchema = Joi.object({
 	translations: Joi.array()
 		.items(Joi.string())
 		.required(),
-	lang: Joi.string().required(),
 	sourceDocument: Joi.string().optional(),
 	firstSeen: Joi.object({
 		documentId: Joi.string().required(),
@@ -122,7 +125,7 @@ router.post(
 router.get(
 	'/:id',
 	jwtGuard,
-	validate(entryIdSchema, 'params'),
+	validate(getEntryIdSchema, 'params'),
 	privilegedRequest(DictController.getEntry)
 );
 

@@ -6,7 +6,7 @@ import {
 } from '../helpers/api';
 import { IPriviligedRequest } from '../routes';
 import * as ConfigService from '../services/config.service';
-import { IConfig, ILanguageConfig } from '../Document/Config';
+import { IConfig, IEditorConfig, ILanguageConfig } from '../Document/Config';
 
 const removeLanguage = async (
 	req: IPriviligedRequest,
@@ -24,6 +24,31 @@ const removeLanguage = async (
 		response = {
 			status: ApiStatuses.OK,
 			message: 'Config found!',
+			payload: null,
+		};
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const updateEditorConfig = async (
+	req: IPriviligedRequest<Partial<IEditorConfig>>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	try {
+		const editorConfig = req.body;
+		await ConfigService.updateEditorConfig({
+			userId,
+			editorConfig,
+		});
+		let response: IApiResponse<void>;
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Config updated!',
 			payload: null,
 		};
 
@@ -268,4 +293,5 @@ export {
 	updateLanguage,
 	removeLanguage,
 	addLanguage,
+	updateEditorConfig,
 };

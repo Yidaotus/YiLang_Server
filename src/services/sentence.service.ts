@@ -5,13 +5,16 @@ import SentenceWord, { ISentenceWord } from '../entities/SentenceWord';
 
 const get = async ({
 	userId,
+	langId,
 	id,
 }: {
 	userId: string;
+	langId: string;
 	id: string;
 }): Promise<IDictionarySentence> => {
 	const sentence = await DictionarySentence.findOne({
 		userId,
+		lang: langId,
 		_id: id,
 	})
 		.lean<IDictionarySentence>()
@@ -21,56 +24,70 @@ const get = async ({
 
 const getAllForWord = async ({
 	userId,
+	langId,
 	wordId,
 }: {
 	userId: string;
+	langId: string;
 	wordId: string;
 }): Promise<Array<IDictionarySentence>> => {
 	const junctions = await SentenceWord.find({
-		sentenceId: wordId,
+		wordId,
 		userId,
+		langId,
 	});
 	const sentenceIds = junctions.map(({ sentenceId }) => sentenceId);
-	const entries: IDictionarySentence[] = await DictionarySentence.find({
+	const entries = await DictionarySentence.find({
+		lang: langId,
 		userId,
 	})
-		.in('id', sentenceIds)
-		.lean<Array<IDictionarySentence>>()
+		.in('_id', sentenceIds)
 		.exec();
-	return entries;
+	return entries.map((entry) => entry.toJSON<IDictionarySentence>());
 };
 
 const getAllByLanguage = async ({
 	userId,
-	lang,
+	langId,
 }: {
 	userId: string;
-	lang: string;
+	langId: string;
 }): Promise<Array<IDictionarySentence>> => {
-	return await DictionarySentence.find({
+	const foundWords = await DictionarySentence.find({
 		userId,
-		lang,
-	})
-		.lean<Array<IDictionarySentence>>()
-		.exec();
+		lang: langId,
+	}).exec();
+	return foundWords.map((w) => w.toJSON<IDictionarySentence>());
 };
 
-const remove = async ({ userId, id }: { userId: string; id: string }) => {
+const remove = async ({
+	userId,
+	langId,
+	id,
+}: {
+	userId: string;
+	langId: string;
+	id: string;
+}) => {
 	await DictionarySentence.deleteOne({
 		userId,
+		lang: langId,
 		_id: id,
 	}).exec();
 };
 
 const create = async ({
 	userId,
+	langId,
 	sentence,
 }: {
 	userId: string;
+	langId: string;
 	sentence: Omit<IDictionarySentence, 'id'>;
 }): Promise<string> => {
 	const createdSentence = await DictionarySentence.create({
 		userId,
+		lang: langId,
 		...sentence,
 	});
 	return createdSentence.id;
@@ -79,13 +96,18 @@ const create = async ({
 const update = async ({
 	userId,
 	id,
+	langId,
 	newSentence,
 }: {
 	userId: string;
+	langId: string;
 	id: string;
 	newSentence: Omit<IDictionarySentence, 'id'>;
 }) => {
-	await DictionarySentence.updateOne({ id: id, userId }, { ...newSentence });
+	await DictionarySentence.updateOne(
+		{ id, lang: langId, userId },
+		{ ...newSentence }
+	);
 };
 
 export { get, getAllByLanguage, getAllForWord, create, update, remove };

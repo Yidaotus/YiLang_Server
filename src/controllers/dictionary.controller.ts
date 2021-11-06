@@ -16,14 +16,15 @@ const list = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const { filter, sortBy, skip, limit, excerptLength, lang } = req.body;
+	const { filter, sortBy, skip, limit, excerptLength } = req.body;
+	const { langId } = req.params;
 	try {
 		const userId = req.user.id;
 		const listing = await DictionaryService.listEntries({
 			sortBy,
 			skip,
 			limit,
-			lang,
+			lang: langId,
 			excerptLength,
 			userId,
 			filter,
@@ -50,53 +51,19 @@ const list = async (
 	}
 };
 
-const getAll = async (
-	req: IPriviligedRequest,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	const userId = req.user.id;
-	const lang = req.params.lang as string;
-	try {
-		const entries = await DictionaryService.find({
-			userId,
-			lang,
-			searchTerm: '',
-		});
-
-		let response: IApiResponse<IDictionaryEntry[]>;
-		if (entries.length > 0) {
-			response = {
-				status: ApiStatuses.OK,
-				message: 'Entries found!',
-				payload: entries,
-			};
-		} else {
-			response = {
-				status: ApiStatuses.OK,
-				message: 'No entries found!',
-				payload: [],
-			};
-		}
-
-		res.status(200).json(response);
-	} catch (err) {
-		next(err);
-	}
-};
-
 const searchEntries = async (
 	req: IPriviligedRequest<ISearchDictionaryParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const { key, lang } = req.body;
+	const { key } = req.body;
 	const userId = req.user.id;
 
 	try {
+		const { langId } = req.params;
 		const entries = await DictionaryService.find({
 			userId,
-			lang,
+			lang: langId,
 			searchTerm: key,
 		});
 
@@ -125,11 +92,12 @@ const getEntry = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id;
 	const userId = req.user.id;
 	try {
+		const { id, langId } = req.params;
 		const getResult = await DictionaryService.get({
 			userId,
+			langId,
 			id,
 		});
 		let response: IApiResponse<IDictionaryEntry>;
@@ -139,15 +107,15 @@ const getEntry = async (
 				message: 'Entries found!',
 				payload: getResult,
 			};
+			res.status(200).json(response);
 		} else {
 			response = {
-				status: ApiStatuses.OK,
+				status: ApiStatuses.NOTFOUND,
 				message: 'No entries found!',
 				payload: null,
 			};
+			res.status(401).json(response);
 		}
-
-		res.status(200).json(response);
 	} catch (err) {
 		next(err);
 	}
@@ -158,12 +126,13 @@ const updateEntry = async (
 	next: NextFunction
 ): Promise<void> => {
 	const entry = req.body;
-	const entryId = req.params.id;
+	const { id, langId } = req.params;
 	const userId = req.user.id;
 	try {
 		await DictionaryService.update({
 			userId,
-			id: entryId,
+			id,
+			langId,
 			newEntry: entry,
 		});
 
@@ -300,7 +269,6 @@ export {
 	getEntry,
 	searchEntries,
 	list,
-	getAll,
 	fetchEntries,
 	updateEntry,
 };

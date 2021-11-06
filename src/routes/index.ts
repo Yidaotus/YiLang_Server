@@ -8,6 +8,9 @@ import SentencesRouter from './sentences';
 import SentenceWordRouter from './sentenceWord';
 import { ITokenData, ApiPaths } from '../helpers/api';
 import { IUser } from '../entities/user';
+import Joi from 'joi';
+import { validate } from '../middleware/validator';
+import { ObjectIdSchema } from './schemas';
 
 const router = express.Router();
 
@@ -20,12 +23,32 @@ export interface IPriviligedRequest<T = void> extends IApiRequest<T> {
 	user: IUser;
 }
 
+const langIdSchema = Joi.object({
+	langId: ObjectIdSchema,
+});
+
 router.use('/user', UserRouter);
-router.use('/dictionary/entries', DictRouter);
+router.use(
+	'/dictionary/:langId/entries',
+	validate(langIdSchema, 'params'),
+	DictRouter
+);
 router.use('/documents', DocumentRouter);
-router.use('/dictionary/tags', TagsRouter);
-router.use('/dictionary/sentences', SentencesRouter);
-router.use('/dictionary/sentenceword', SentenceWordRouter);
+router.use(
+	'/dictionary/:langId/tags',
+	validate(langIdSchema, 'params'),
+	TagsRouter
+);
+router.use(
+	'/dictionary/:langId/sentences',
+	validate(langIdSchema, 'params'),
+	SentencesRouter
+);
+router.use(
+	'/dictionary/:langId/link',
+	validate(langIdSchema, 'params'),
+	SentenceWordRouter
+);
 router.use('/config', ConfigRouter);
 
 export default router;

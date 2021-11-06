@@ -13,20 +13,19 @@ const listDocuments = async ({
 	lang,
 }: IListDocumentsParams & { userId: string }) => {
 	// @TODO LANG!
-	const documents: Array<IDocumentSerialized> = await DocumentModel.find({
+	const documents = await DocumentModel.find({
 		userId,
 		lang,
 	})
 		.sort({ [sortBy]: -1 })
 		.limit(limit)
 		.skip(skip)
-		.lean<Array<IDocumentSerialized>>()
 		.exec();
 	const total = await DocumentModel.countDocuments({ userId, lang });
 
 	const excerptedDocuments: Array<IDocumentExcerpt> = documents.map(
 		(doc) => ({
-			id: doc.id,
+			id: doc._id,
 			title: doc.title,
 			excerpt: '',
 			createdAt: doc.createdAt,
@@ -38,7 +37,7 @@ const listDocuments = async ({
 
 const get = async ({ userId, id }: { userId: string; id: string }) => {
 	const document = await DocumentModel.findOne({
-		id,
+		_id: id,
 		userId,
 	})
 		.lean<IDocumentSerialized>()
@@ -48,7 +47,7 @@ const get = async ({ userId, id }: { userId: string; id: string }) => {
 
 const remove = async ({ userId, id }: { userId: string; id: string }) => {
 	await DocumentModel.findOneAndDelete({
-		id,
+		_id: id,
 		userId,
 	}).exec();
 };
@@ -76,7 +75,7 @@ const update = async ({
 	id: string;
 	newDocument: Omit<IDocumentSerialized, 'id'>;
 }) => {
-	await DocumentModel.updateOne({ userId, id }, newDocument).exec();
+	await DocumentModel.updateOne({ userId, _id: id }, newDocument).exec();
 };
 
 export { listDocuments, get, update, remove, create };

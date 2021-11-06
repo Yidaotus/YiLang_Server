@@ -39,6 +39,12 @@ router.post('/new', jwtGuard, privilegedRequest(ConfigController.create));
 router.post('/', jwtGuard, privilegedRequest(ConfigController.update));
 
 router.post(
+	'/editor',
+	jwtGuard,
+	privilegedRequest(ConfigController.updateEditorConfig)
+);
+
+router.post(
 	'/activeLanguage',
 	jwtGuard,
 	privilegedRequest(ConfigController.setActiveLanguage)

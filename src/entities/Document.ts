@@ -19,9 +19,9 @@ export interface IDocumentModel extends Model<IDocumentDocument> {}
 const DocumentSchema = new Schema<IDocumentDB, IDocumentModel>(
 	{
 		title: { type: String, required: false },
-		userId: { type: Types.ObjectId, required: true },
-		lang: { type: Types.ObjectId, required: true },
-		serializedDocument: { type: Schema.Types.Mixed, require: true },
+		userId: { type: Schema.Types.ObjectId, required: true },
+		lang: { type: Schema.Types.ObjectId, required: true },
+		serializedDocument: { type: String, require: true },
 		createdAt: Date,
 		updatedAt: Date,
 		deletedAt: Date,

@@ -15,10 +15,12 @@ const unlink = async (
 ): Promise<void> => {
 	const userId = req.user.id;
 	try {
+		const { langId } = req.params;
 		const { wordId, sentenceId } = req.body;
 		await SentenceWordService.unlink({
 			userId,
 			sentenceId,
+			langId,
 			wordId,
 		});
 
@@ -42,10 +44,12 @@ const link = async (
 ): Promise<void> => {
 	const userId = req.user.id;
 	try {
+		const { langId } = req.params;
 		const { wordId, sentenceId } = req.body;
 		await SentenceWordService.link({
 			userId,
 			sentenceId,
+			langId,
 			wordId,
 		});
 

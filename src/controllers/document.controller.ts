@@ -107,7 +107,6 @@ const getDocument = async (
 	const id = req.params.id;
 	const userId = req.user.id;
 	try {
-		//await UserService.register(userDetails, verificationUrl);
 		const document = await DocumentService.get({
 			id,
 			userId,
@@ -120,15 +119,15 @@ const getDocument = async (
 				message: 'Document found!',
 				payload: document,
 			};
+			res.status(200).json(response);
 		} else {
 			response = {
-				status: ApiStatuses.OK,
+				status: ApiStatuses.NOTFOUND,
 				message: 'No Document found!',
 				payload: null,
 			};
+			res.status(404).json(response);
 		}
-
-		res.status(200).json(response);
 	} catch (err) {
 		next(err);
 	}

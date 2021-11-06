@@ -17,6 +17,7 @@ export const ApiStatuses = {
 	UNAUTHORIZED: 3,
 	INVALIDARGUMENT: 4,
 	ERROR: 5,
+	NOTFOUND: 6,
 } as const;
 export type ApiStatus = typeof ApiStatuses[keyof typeof ApiStatuses];
 

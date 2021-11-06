@@ -3,12 +3,14 @@ import {
 	IConfig,
 	ILanguageConfig,
 	IDictionaryLookupSource,
+	IEditorConfig,
 } from '../Document/Config';
 
 export interface IConfigDB extends Omit<IConfig, 'activeLanguage'> {
 	_id: Types.ObjectId;
 	userId: Types.ObjectId;
 	languageConfigs: Types.DocumentArray<ILanguageConfig & Types.Subdocument>;
+	editorConfig: IEditorConfig & Types.Subdocument;
 	activeLanguage: Types.ObjectId;
 	createdAt: Date;
 	updatedAt: Date;
@@ -27,17 +29,27 @@ const DictionaryLookupSourceSchema = new Schema<IDictionaryLookupSource>(
 	{ _id: false }
 );
 
+const EditorConfigSchema = new Schema<IEditorConfig>(
+	{
+		autoSave: { type: Boolean, required: false },
+		saveEveryNActions: { type: Number, required: false },
+	},
+	{ _id: false }
+);
+
 const LanguageConfigSchema = new Schema<ILanguageConfig>({
 	name: { type: String, required: true },
 	lookupSources: { type: [DictionaryLookupSourceSchema], required: false },
 });
 
 LanguageConfigSchema.index({ name: 1 });
-LanguageConfigSchema.set('toJSON', {
+LanguageConfigSchema.set('toObject', {
 	virtuals: true,
 	versionKey: false,
-	transform: function(_: unknown, ret: IConfigDocument) {
-		ret.id = ret._id;
+	transform: function(
+		doc: ILanguageConfig & Types.Subdocument,
+		ret: ILanguageConfig & { _id: Types.ObjectId }
+	) {
 		delete ret._id;
 	},
 });
@@ -45,8 +57,9 @@ LanguageConfigSchema.set('toJSON', {
 const ConfigSchema = new Schema<IConfigDocument, IConfigModel>(
 	{
 		languageConfigs: { type: [LanguageConfigSchema], require: false },
-		activeLanguage: { type: Types.ObjectId, require: false },
-		userId: { type: Types.ObjectId, require: true },
+		editorConfig: { type: EditorConfigSchema, require: false },
+		activeLanguage: { type: Schema.Types.ObjectId, require: false },
+		userId: { type: Schema.Types.ObjectId, require: true },
 		createdAt: Date,
 		updatedAt: Date,
 		deletedAt: Date,

@@ -1,5 +1,5 @@
 import DictionaryEntry, { IDictionaryEntryDB } from '../entities/Dictionary';
-import { Schema } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 import { DictionaryEntryField, IListDictionaryParams } from '../helpers/api';
 import { IDictionaryEntry } from '../Document/Dictionary';
 import { IExcerptedDocumentLink } from '../Document/Document';
@@ -88,9 +88,11 @@ const listEntries = async ({
 	const entries = await new entriesQuery()
 		.limit(limit)
 		.skip(skip)
-		.lean<Array<IDictionaryEntry>>()
 		.exec();
-	return { total, entries };
+	return {
+		total,
+		entries: entries.map((entry) => entry.toJSON<IDictionaryEntry>()),
+	};
 };
 
 /*
@@ -166,30 +168,39 @@ const create = async ({
 
 const update = async ({
 	userId,
+	langId,
 	id,
 	newEntry,
 }: {
 	userId: string;
+	langId: string;
 	id: string;
 	newEntry: IDictionaryEntry;
 }) => {
-	await DictionaryEntry.updateOne({ _id: id, userId }, { ...newEntry });
+	await DictionaryEntry.updateOne(
+		{ _id: id, userId, lang: langId },
+		{ ...newEntry }
+	);
 };
 
 const get = async ({
 	userId,
+	langId,
 	id,
 }: {
 	userId: string;
+	langId: string;
 	id: string;
 }): Promise<IDictionaryEntry> => {
 	const entry = await DictionaryEntry.findOne({
 		_id: id,
+		lang: langId,
 		userId,
-	})
-		.lean<IDictionaryEntry>()
-		.exec();
-	return entry;
+	}).exec();
+	if (entry) {
+		return entry.toJSON<IDictionaryEntry>();
+	}
+	return null;
 };
 
 interface IEntryWithExcerpt {
@@ -343,10 +354,8 @@ const find = async ({
 		key: new RegExp(`.*${searchTerm}.*`, 'gi'),
 		lang,
 		userId,
-	})
-		.lean<Array<IDictionaryEntry>>()
-		.exec();
-	return entries;
+	}).exec();
+	return entries.map((entry) => entry.toJSON<IDictionaryEntry>());
 };
 
 export {

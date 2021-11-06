@@ -30,34 +30,51 @@ const getAllByLanguage = async ({
 	return entries;
 };
 
-const remove = async ({ userId, id }: { userId: string; id: string }) => {
+const remove = async ({
+	userId,
+	langId,
+	id,
+}: {
+	userId: string;
+	langId: string;
+	id: string;
+}) => {
 	await DictionaryTag.deleteOne({
 		userId,
+		lang: langId,
 		_id: id,
 	}).exec();
 };
 
 const create = async ({
 	userId,
+	langId,
 	tag,
 }: {
 	userId: string;
+	langId: string;
 	tag: Omit<IDictionaryTag, 'id'>;
 }): Promise<string> => {
-	const createdTag = await DictionaryTag.create({ userId, ...tag });
+	const createdTag = await DictionaryTag.create({
+		userId,
+		lang: langId,
+		...tag,
+	});
 	return createdTag.id;
 };
 
 const update = async ({
 	userId,
+	langId,
 	id,
 	newTag,
 }: {
 	userId: string;
+	langId: string;
 	id: string;
 	newTag: Omit<IDictionaryTag, 'id'>;
 }) => {
-	await DictionaryTag.updateOne({ id: id, userId }, { ...newTag });
+	await DictionaryTag.updateOne({ id, userId, lang: langId }, { ...newTag });
 };
 
 export { get, getAllByLanguage, create, update, remove };

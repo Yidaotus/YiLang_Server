@@ -3,11 +3,12 @@ import * as TagsController from '../controllers/tags.controller';
 import Joi from 'joi';
 import { validate } from '../middleware/validator';
 import { jwtGuard, privilegedRequest } from '../middleware/auth';
+import { ObjectIdSchema } from './schemas';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 const getAllSchema = Joi.object({
-	lang: Joi.string().required(),
+	langId: Joi.string().required(),
 });
 
 const getEntriesSchema = Joi.object({
@@ -18,7 +19,7 @@ const getEntriesSchema = Joi.object({
 });
 
 const tagIdSchema = Joi.object({
-	id: Joi.string().required(),
+	id: ObjectIdSchema,
 });
 
 const tagSchema = Joi.object({
@@ -72,7 +73,7 @@ router.delete(
 );
 
 router.get(
-	'/byLanguage/:lang',
+	'/',
 	jwtGuard,
 	validate(getAllSchema, 'params'),
 	privilegedRequest(TagsController.getAll)

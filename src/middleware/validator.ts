@@ -39,7 +39,12 @@ const validate = (
 		err.name = YiErrors.VALIDATION_ERROR;
 		next(err);
 	} else {
-		if (isTarget(target)) req[target] = value;
+		if (isTarget(target)) {
+			req[target] = {
+				...(req[target] as Record<string, unknown>),
+				value,
+			};
+		}
 		next();
 	}
 };

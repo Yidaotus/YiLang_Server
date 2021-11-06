@@ -16,9 +16,10 @@ const remove = async (
 ): Promise<void> => {
 	const userId = req.user.id;
 	try {
-		const id = req.query.id as string;
+		const { langId, id } = req.params;
 		const newTagId = await TagService.remove({
 			userId,
+			langId,
 			id,
 		});
 
@@ -43,10 +44,11 @@ const update = async (
 	const userId = req.user.id;
 	try {
 		const tag = req.body;
-		const id = req.query.id as string;
+		const { langId, id } = req.params;
 		const newTagId = await TagService.update({
 			userId,
 			id,
+			langId,
 			newTag: tag,
 		});
 
@@ -71,8 +73,10 @@ const add = async (
 	const userId = req.user.id;
 	try {
 		const tag = req.body;
+		const { langId } = req.params;
 		const newTagId = await TagService.create({
 			userId,
+			langId,
 			tag,
 		});
 
@@ -89,49 +93,14 @@ const add = async (
 	}
 };
 
-const getMany = async (
-	req: IPriviligedRequest<IGetManyTagsPrams>,
-	res: Response,
-	next: NextFunction
-): Promise<void> => {
-	const userId = req.user.id;
-	try {
-		const { lang, ids } = req.body;
-		//await UserService.register(userDetails, verificationUrl);
-		const entries: IDictionaryTag[] = await TagService.get({
-			userId,
-			ids: ids as Array<string>,
-		});
-		let response: IApiResponse<IDictionaryTag[]>;
-		if (entries.length > 0) {
-			response = {
-				status: ApiStatuses.OK,
-				message: 'Tags found!',
-				payload: entries,
-			};
-		} else {
-			response = {
-				status: ApiStatuses.OK,
-				message: 'No tags found!',
-				payload: [],
-			};
-		}
-
-		res.status(200).json(response);
-	} catch (err) {
-		next(err);
-	}
-};
-
 const getAll = async (
 	req: IPriviligedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const lang = req.params.lang as string;
 	const userId = req.user.id;
 	try {
-		//await UserService.register(userDetails, verificationUrl);
+		const lang = req.params.langId as string;
 		const entries = await TagService.getAllByLanguage({
 			lang,
 			userId,
@@ -158,4 +127,4 @@ const getAll = async (
 	}
 };
 
-export { getAll, getMany, add, update, remove };
+export { getAll, add, update, remove };

@@ -15,9 +15,10 @@ const remove = async (
 ): Promise<void> => {
 	const userId = req.user.id;
 	try {
-		const id = req.query.id as string;
+		const { id, langId } = req.params;
 		await SentenceService.remove({
 			userId,
+			langId,
 			id,
 		});
 
@@ -42,9 +43,10 @@ const update = async (
 	const userId = req.user.id;
 	try {
 		const sentence = req.body;
-		const id = req.query.id as string;
+		const { id, langId } = req.params;
 		await SentenceService.update({
 			userId,
+			langId,
 			id,
 			newSentence: sentence,
 		});
@@ -70,8 +72,10 @@ const add = async (
 	const userId = req.user.id;
 	try {
 		const sentence = req.body;
+		const { langId } = req.params;
 		const newSentenceId = await SentenceService.create({
 			userId,
+			langId,
 			sentence,
 		});
 
@@ -95,11 +99,11 @@ const getAllForWord = async (
 ): Promise<void> => {
 	const userId = req.user.id;
 	try {
-		const { wordId } = req.body;
-		//await UserService.register(userDetails, verificationUrl);
+		const { langId, wordId } = req.params;
 		const sentences: Array<IDictionarySentence> = await SentenceService.getAllForWord(
 			{
 				userId,
+				langId,
 				wordId,
 			}
 		);
@@ -129,12 +133,11 @@ const getAllByLanguage = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const lang = req.params.lang as string;
 	const userId = req.user.id;
 	try {
-		//await UserService.register(userDetails, verificationUrl);
+		const { langId } = req.params;
 		const sentences = await SentenceService.getAllByLanguage({
-			lang,
+			langId,
 			userId,
 		});
 
