@@ -42,7 +42,7 @@ const validate = (
 		if (isTarget(target)) {
 			req[target] = {
 				...(req[target] as Record<string, unknown>),
-				value,
+				...value,
 			};
 		}
 		next();

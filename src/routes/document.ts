@@ -5,7 +5,7 @@ import * as DocumentController from '../controllers/document.controller';
 import { validate } from '../middleware/validator';
 import { ObjectIdSchema } from './schemas';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 const documentSchema = Joi.object({
 	lang: Joi.string().required(),
@@ -25,7 +25,6 @@ const idSchema = Joi.object({
 router.post(
 	'/',
 	jwtGuard,
-	validate(documentSchema, 'body'),
 	privilegedRequest(DocumentController.createDocument)
 );
 

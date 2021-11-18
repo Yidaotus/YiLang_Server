@@ -154,9 +154,11 @@ const addEntry = async (
 ): Promise<void> => {
 	const entry = req.body;
 	const userId = req.user.id;
+	const langId = req.params.langId;
 	try {
 		const entryId = await DictionaryService.create({
 			userId,
+			langId,
 			entry,
 		});
 

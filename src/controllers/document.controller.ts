@@ -10,17 +10,17 @@ import { IPriviligedRequest } from '../routes';
 import * as DocumentService from '../services/document.service';
 
 const createDocument = async (
-	req: IPriviligedRequest<Omit<IDocumentSerialized, 'id'>>,
+	req: IPriviligedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const newDocument = req.body;
 	const userId = req.user.id;
+	const { langId } = req.params;
 
 	try {
 		const documentId = await DocumentService.create({
 			userId,
-			newDocument,
+			langId,
 		});
 
 		const response: IApiResponse<string> = {
@@ -39,7 +39,7 @@ const updateDocument = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id;
+	const { id, langId } = req.params;
 	const newDocument = req.body;
 	const userId = req.user.id;
 
@@ -47,6 +47,7 @@ const updateDocument = async (
 		await DocumentService.update({
 			userId,
 			id,
+			langId,
 			newDocument,
 		});
 
@@ -67,6 +68,8 @@ const listDocuments = async (
 	next: NextFunction
 ): Promise<void> => {
 	const { sortBy, skip, limit, excerptLength, lang } = req.body;
+	const { langId } = req.params;
+
 	try {
 		const userId = req.user.id;
 		const excerptedDocuments = await DocumentService.listDocuments({
@@ -75,7 +78,7 @@ const listDocuments = async (
 			limit,
 			excerptLength,
 			userId,
-			lang,
+			lang: langId,
 		});
 
 		let response: IApiResponse<IListDocumentResult>;
@@ -104,11 +107,13 @@ const getDocument = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id;
 	const userId = req.user.id;
+	const { id, langId } = req.params;
+
 	try {
 		const document = await DocumentService.get({
 			id,
+			langId,
 			userId,
 		});
 
@@ -138,13 +143,15 @@ const removeDocument = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const id = req.params.id;
+	const { id, langId } = req.params;
 	const userId = req.user.id;
+
 	try {
 		//await UserService.register(userDetails, verificationUrl);
 		const document = await DocumentService.remove({
 			id,
 			userId,
+			langId,
 		});
 
 		let response: IApiResponse<null>;

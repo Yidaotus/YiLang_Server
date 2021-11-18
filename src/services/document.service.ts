@@ -12,7 +12,6 @@ const listDocuments = async ({
 	userId,
 	lang,
 }: IListDocumentsParams & { userId: string }) => {
-	// @TODO LANG!
 	const documents = await DocumentModel.find({
 		userId,
 		lang,
@@ -35,9 +34,18 @@ const listDocuments = async ({
 	return { total, excerpts: excerptedDocuments };
 };
 
-const get = async ({ userId, id }: { userId: string; id: string }) => {
+const get = async ({
+	userId,
+	id,
+	langId,
+}: {
+	userId: string;
+	id: string;
+	langId: string;
+}) => {
 	const document = await DocumentModel.findOne({
 		_id: id,
+		lang: langId,
 		userId,
 	})
 		.lean<IDocumentSerialized>()
@@ -45,23 +53,42 @@ const get = async ({ userId, id }: { userId: string; id: string }) => {
 	return document;
 };
 
-const remove = async ({ userId, id }: { userId: string; id: string }) => {
+const remove = async ({
+	userId,
+	id,
+	langId,
+}: {
+	userId: string;
+	id: string;
+	langId: string;
+}) => {
 	await DocumentModel.findOneAndDelete({
 		_id: id,
+		lang: langId,
 		userId,
 	}).exec();
 };
 
+const DEFAULT_DOCUMENT = JSON.stringify([
+	{
+		type: 'title',
+		children: [{ text: `Your new document!` }],
+		align: 'center',
+	},
+	{ type: 'paragraph', align: 'left', children: [{ text: `Let's learn!` }] },
+]);
+
 const create = async ({
 	userId,
-	newDocument,
+	langId,
 }: {
 	userId: string;
-	newDocument: Omit<IDocumentSerialized, 'id'>;
+	langId: string;
 }) => {
 	const createdDocument = await DocumentModel.create({
 		userId,
-		...newDocument,
+		lang: langId,
+		serializedDocument: DEFAULT_DOCUMENT,
 	});
 	return createdDocument.id as string;
 };
@@ -69,13 +96,18 @@ const create = async ({
 const update = async ({
 	userId,
 	id,
+	langId,
 	newDocument,
 }: {
 	userId: string;
 	id: string;
+	langId: string;
 	newDocument: Omit<IDocumentSerialized, 'id'>;
 }) => {
-	await DocumentModel.updateOne({ userId, _id: id }, newDocument).exec();
+	await DocumentModel.updateOne(
+		{ userId, _id: id, lang: langId },
+		newDocument
+	).exec();
 };
 
 export { listDocuments, get, update, remove, create };

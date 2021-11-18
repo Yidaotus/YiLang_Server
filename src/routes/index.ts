@@ -28,12 +28,19 @@ const langIdSchema = Joi.object({
 });
 
 router.use('/user', UserRouter);
+
 router.use(
 	'/dictionary/:langId/entries',
 	validate(langIdSchema, 'params'),
 	DictRouter
 );
-router.use('/documents', DocumentRouter);
+
+router.use(
+	'/documents/:langId',
+	validate(langIdSchema, 'params'),
+	DocumentRouter
+);
+
 router.use(
 	'/dictionary/:langId/tags',
 	validate(langIdSchema, 'params'),

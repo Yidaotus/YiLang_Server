@@ -150,13 +150,19 @@ const remove = async ({ userId, id }: { userId: string; id: string }) => {
 
 const create = async ({
 	userId,
+	langId,
 	entry,
 }: {
 	userId: string;
+	langId: string;
 	entry: IDictionaryEntry;
 }): Promise<number> => {
 	try {
-		const { id } = await DictionaryEntry.create({ ...entry, userId });
+		const { id } = await DictionaryEntry.create({
+			...entry,
+			userId,
+			lang: langId,
+		});
 		return id;
 	} catch (e) {
 		if (e instanceof Error && e.message.startsWith('E11000')) {
