@@ -10,7 +10,7 @@ const errorHandler = async (
 	next: NextFunction
 ): Promise<Response<unknown>> => {
 	let status: ApiStatus = ApiStatuses.ERROR;
-	let message = err.message;
+	let message = err.message || 'Unkown Error';
 	if (err) {
 		if (err?.name === YiErrors.VALIDATION_ERROR) {
 			status = ApiStatuses.INVALIDARGUMENT;

@@ -142,6 +142,10 @@ const findOccurances = async ({
 */
 
 const remove = async ({ userId, id }: { userId: string; id: string }) => {
+	const child = await DictionaryEntry.findOne({ root: id }).exec();
+	if (child) {
+		throw new Error('Cannot delete entry which has child entries!');
+	}
 	await DictionaryEntry.deleteOne({
 		_id: id,
 		userId,
