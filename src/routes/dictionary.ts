@@ -42,7 +42,9 @@ const entrySchemaOptional = Joi.object({
 	spelling: Joi.string()
 		.optional()
 		.allow(''),
-	root: Joi.string().optional(),
+	root: Joi.array()
+		.items(Joi.string())
+		.required(),
 });
 
 const entrySchema = Joi.object({
@@ -63,7 +65,9 @@ const entrySchema = Joi.object({
 	spelling: Joi.string()
 		.optional()
 		.allow(''),
-	root: Joi.string().optional(),
+	root: Joi.array()
+		.items(Joi.string())
+		.required(),
 });
 
 const listSchema = Joi.object({
