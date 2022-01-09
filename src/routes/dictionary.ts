@@ -42,7 +42,7 @@ const entrySchemaOptional = Joi.object({
 	spelling: Joi.string()
 		.optional()
 		.allow(''),
-	root: Joi.array()
+	roots: Joi.array()
 		.items(Joi.string())
 		.required(),
 });
@@ -65,7 +65,7 @@ const entrySchema = Joi.object({
 	spelling: Joi.string()
 		.optional()
 		.allow(''),
-	root: Joi.array()
+	roots: Joi.array()
 		.items(Joi.string())
 		.required(),
 });
@@ -89,6 +89,10 @@ const listSchema = Joi.object({
 		.optional()
 		.allow(''),
 	lang: Joi.string().required(),
+	searchKey: Joi.string().optional(),
+	tagFilter: Joi.array()
+		.items(Joi.string())
+		.optional(),
 });
 
 router.post(

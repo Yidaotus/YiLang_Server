@@ -3,17 +3,19 @@ import DictionaryTag from '../entities/Tag';
 
 const get = async ({
 	userId,
-	ids,
+	id,
+	langId,
 }: {
 	userId: string;
-	ids: Array<string>;
-}): Promise<Array<IDictionaryTag>> => {
-	const entries: IDictionaryTag[] = await DictionaryTag.find({
+	id: string;
+	langId: string;
+}): Promise<IDictionaryTag> => {
+	const entry: IDictionaryTag = await DictionaryTag.findOne({
 		userId,
-	})
-		.in('id', ids)
-		.exec();
-	return entries;
+		lang: langId,
+		_id: id,
+	}).exec();
+	return entry;
 };
 
 const getAllByLanguage = async ({
@@ -77,4 +79,21 @@ const update = async ({
 	await DictionaryTag.updateOne({ id, userId, lang: langId }, { ...newTag });
 };
 
-export { get, getAllByLanguage, create, update, remove };
+const find = async ({
+	userId,
+	lang,
+	searchTerm,
+}: {
+	userId: string;
+	lang: string;
+	searchTerm: string;
+}) => {
+	const tags = await DictionaryTag.find({
+		name: new RegExp(`.*${searchTerm}.*`, 'gi'),
+		lang,
+		userId,
+	}).exec();
+	return tags.map((entry) => entry.toJSON<IDictionaryTag>());
+};
+
+export { get, getAllByLanguage, create, update, remove, find };

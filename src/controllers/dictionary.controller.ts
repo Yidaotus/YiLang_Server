@@ -16,7 +16,15 @@ const list = async (
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
-	const { filter, sortBy, skip, limit, excerptLength } = req.body;
+	const {
+		filter,
+		sortBy,
+		skip,
+		limit,
+		excerptLength,
+		searchTerm,
+		tagFilter,
+	} = req.body;
 	const { langId } = req.params;
 	try {
 		const userId = req.user.id;
@@ -28,6 +36,8 @@ const list = async (
 			excerptLength,
 			userId,
 			filter,
+			searchTerm,
+			tagFilter,
 		});
 
 		let response: IApiResponse<IListDictionaryResult>;

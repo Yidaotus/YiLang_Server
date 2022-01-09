@@ -18,6 +18,10 @@ const getEntriesSchema = Joi.object({
 		.required(),
 });
 
+const searchEntrySchema = Joi.object({
+	key: Joi.string().required(),
+});
+
 const tagIdSchema = Joi.object({
 	id: ObjectIdSchema,
 });
@@ -58,6 +62,20 @@ router.post(
 	privilegedRequest(TagsController.add)
 );
 
+router.get(
+	'/',
+	jwtGuard,
+	validate(getAllSchema, 'params'),
+	privilegedRequest(TagsController.getAll)
+);
+
+router.post(
+	'/search',
+	jwtGuard,
+	validate(searchEntrySchema, 'body'),
+	privilegedRequest(TagsController.search)
+);
+
 router.post(
 	'/:id',
 	jwtGuard,
@@ -65,18 +83,18 @@ router.post(
 	privilegedRequest(TagsController.update)
 );
 
+router.get(
+	'/:id',
+	jwtGuard,
+	validate(tagIdSchema, 'params'),
+	privilegedRequest(TagsController.get)
+);
+
 router.delete(
 	'/:id',
 	jwtGuard,
 	validate(tagIdSchema, 'params'),
 	privilegedRequest(TagsController.remove)
-);
-
-router.get(
-	'/',
-	jwtGuard,
-	validate(getAllSchema, 'params'),
-	privilegedRequest(TagsController.getAll)
 );
 
 export default router;

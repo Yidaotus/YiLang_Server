@@ -59,6 +59,8 @@ const listEntries = async ({
 	lang,
 	userId,
 	filter,
+	searchTerm,
+	tagFilter,
 }: IListDictionaryParams & { userId: string }) => {
 	let entriesQueryCreator = DictionaryEntry.find({
 		userId,
@@ -72,15 +74,31 @@ const listEntries = async ({
 	}
 	let isFilterQuery = false;
 	if (filter && Object.keys(filter).length > 0) {
-		for (const [key, filt] of Object.entries(filter)) {
-			if (filt) {
+		for (const [key, filters] of Object.entries(filter)) {
+			if (filters) {
 				entriesQueryCreator = entriesQueryCreator.in(
 					key,
-					filt.map((fentry) => new RegExp(fentry, 'gi'))
+					filters.map((filterEntry) => new RegExp(filterEntry, 'gi'))
 				);
 				isFilterQuery = true;
 			}
 		}
+	}
+
+	if (searchTerm) {
+		const regex = new RegExp(searchTerm, 'gi');
+		entriesQueryCreator.find({
+			$or: [
+				{ key: regex },
+				{ spelling: regex },
+				{ comment: regex },
+				{ translations: regex },
+			],
+		});
+	}
+
+	if (tagFilter.length > 0) {
+		entriesQueryCreator.find({ tags: { $in: tagFilter } });
 	}
 
 	const entriesQuery = entriesQueryCreator.toConstructor();

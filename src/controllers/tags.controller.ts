@@ -2,8 +2,8 @@ import { Response, NextFunction } from 'express';
 import {
 	IApiResponse,
 	ApiStatuses,
-	IGetManyTagsPrams,
 	IAddDictionaryTagParams,
+	ISearchTagParams,
 } from '../helpers/api';
 import { IDictionaryTag } from '../Document/Dictionary';
 import { IPriviligedRequest } from '../routes';
@@ -17,7 +17,7 @@ const remove = async (
 	const userId = req.user.id;
 	try {
 		const { langId, id } = req.params;
-		const newTagId = await TagService.remove({
+		await TagService.remove({
 			userId,
 			langId,
 			id,
@@ -26,8 +26,35 @@ const remove = async (
 		let response: IApiResponse<null>;
 		response = {
 			status: ApiStatuses.OK,
-			message: 'Tag created!',
+			message: 'Tag removed!',
 			payload: null,
+		};
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const get = async (
+	req: IPriviligedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	try {
+		const { langId, id } = req.params;
+		const tag = await TagService.get({
+			userId,
+			langId,
+			id,
+		});
+
+		let response: IApiResponse<IDictionaryTag>;
+		response = {
+			status: ApiStatuses.OK,
+			message: 'Tag created!',
+			payload: tag,
 		};
 
 		res.status(200).json(response);
@@ -45,7 +72,7 @@ const update = async (
 	try {
 		const tag = req.body;
 		const { langId, id } = req.params;
-		const newTagId = await TagService.update({
+		await TagService.update({
 			userId,
 			id,
 			langId,
@@ -55,7 +82,7 @@ const update = async (
 		let response: IApiResponse<null>;
 		response = {
 			status: ApiStatuses.OK,
-			message: 'Tag created!',
+			message: 'Tag updated!',
 			payload: null,
 		};
 
@@ -127,4 +154,40 @@ const getAll = async (
 	}
 };
 
-export { getAll, add, update, remove };
+const search = async (
+	req: IPriviligedRequest<ISearchTagParams>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const { key } = req.body;
+	const userId = req.user.id;
+
+	try {
+		const { langId } = req.params;
+		const entries = await TagService.find({
+			userId,
+			lang: langId,
+			searchTerm: key,
+		});
+
+		let response: IApiResponse<Array<IDictionaryTag>>;
+		if (entries && entries.length > 0) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Tags found!',
+				payload: entries,
+			};
+		} else {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'No tags found!',
+				payload: [],
+			};
+		}
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+export { getAll, add, update, remove, get, search };

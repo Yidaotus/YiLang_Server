@@ -147,7 +147,6 @@ const removeDocument = async (
 	const userId = req.user.id;
 
 	try {
-		//await UserService.register(userDetails, verificationUrl);
 		const document = await DocumentService.remove({
 			id,
 			userId,

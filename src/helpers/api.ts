@@ -302,6 +302,8 @@ export interface IListDictionaryParams {
 	limit: number;
 	excerptLength: number;
 	lang: string;
+	searchTerm?: string;
+	tagFilter: Array<string>;
 }
 
 export interface IGetManyTagsPrams {
@@ -310,6 +312,11 @@ export interface IGetManyTagsPrams {
 }
 
 export interface ISearchDictionaryParams {
+	lang: string;
+	key: string;
+}
+
+export interface ISearchTagParams {
 	lang: string;
 	key: string;
 }
