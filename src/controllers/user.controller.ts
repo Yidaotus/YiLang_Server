@@ -9,7 +9,7 @@ import {
 	IVerifyEmailParams,
 	ApiStatuses,
 } from '../helpers/api';
-import { IApiRequest, IPriviligedRequest } from '../routes/';
+import { IApiRequest, IPrivilegedRequest } from '../routes/';
 import { config } from '../helpers/config';
 
 const register = async (
@@ -84,7 +84,7 @@ const login = async (
 };
 
 const authenticate = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {

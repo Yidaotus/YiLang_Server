@@ -5,11 +5,11 @@ import {
 	IAddDictionarySentenceParams,
 	ILinkSentenceWordParams,
 } from '../helpers/api';
-import { IPriviligedRequest } from '../routes';
+import { IPrivilegedRequest } from '../routes';
 import * as SentenceWordService from '../services/sentenceword.service';
 
 const unlink = async (
-	req: IPriviligedRequest<ILinkSentenceWordParams>,
+	req: IPrivilegedRequest<ILinkSentenceWordParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -38,7 +38,7 @@ const unlink = async (
 };
 
 const link = async (
-	req: IPriviligedRequest<ILinkSentenceWordParams>,
+	req: IPrivilegedRequest<ILinkSentenceWordParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {

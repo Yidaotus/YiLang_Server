@@ -4,12 +4,12 @@ import {
 	ApiStatuses,
 	ISetActiveLangParams,
 } from '../helpers/api';
-import { IPriviligedRequest } from '../routes';
+import { IPrivilegedRequest } from '../routes';
 import * as ConfigService from '../services/config.service';
 import { IConfig, IEditorConfig, ILanguageConfig } from '../Document/Config';
 
 const removeLanguage = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -34,7 +34,7 @@ const removeLanguage = async (
 };
 
 const updateEditorConfig = async (
-	req: IPriviligedRequest<Partial<IEditorConfig>>,
+	req: IPrivilegedRequest<Partial<IEditorConfig>>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -59,7 +59,7 @@ const updateEditorConfig = async (
 };
 
 const updateLanguage = async (
-	req: IPriviligedRequest<Omit<ILanguageConfig, 'id'>>,
+	req: IPrivilegedRequest<Omit<ILanguageConfig, 'id'>>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -86,7 +86,7 @@ const updateLanguage = async (
 };
 
 const addLanguage = async (
-	req: IPriviligedRequest<Omit<ILanguageConfig, 'id'>>,
+	req: IPrivilegedRequest<Omit<ILanguageConfig, 'id'>>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -119,7 +119,7 @@ const addLanguage = async (
 };
 
 const getLanguage = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -152,7 +152,7 @@ const getLanguage = async (
 };
 
 const get = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -183,7 +183,7 @@ const get = async (
 };
 
 const remove = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -208,7 +208,7 @@ const remove = async (
 };
 
 const create = async (
-	req: IPriviligedRequest<Omit<IConfig, 'id'>>,
+	req: IPrivilegedRequest<Omit<IConfig, 'id'>>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -233,7 +233,7 @@ const create = async (
 };
 
 const update = async (
-	req: IPriviligedRequest<Omit<IConfig, 'id'>>,
+	req: IPrivilegedRequest<Omit<IConfig, 'id'>>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -259,7 +259,7 @@ const update = async (
 };
 
 const setActiveLanguage = async (
-	req: IPriviligedRequest<ISetActiveLangParams>,
+	req: IPrivilegedRequest<ISetActiveLangParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {

@@ -2,6 +2,7 @@ import { Schema, Types } from 'mongoose';
 import { IDictionarySentence } from '../Document/Dictionary';
 import DictionarySentence from '../entities/Sentence';
 import SentenceWord, { ISentenceWord } from '../entities/SentenceWord';
+import { IListSentencesParams } from '../helpers/api';
 
 const get = async ({
 	userId,
@@ -20,6 +21,61 @@ const get = async ({
 		.lean<IDictionarySentence>()
 		.exec();
 	return sentence;
+};
+
+const listSentences = async ({
+	sortBy,
+	limit,
+	skip,
+	lang,
+	userId,
+	filter,
+	searchTerm,
+}: IListSentencesParams & { userId: string }) => {
+	let sentencesQueryCreator = DictionarySentence.find({
+		userId,
+		lang,
+	});
+
+	if (sortBy) {
+		sentencesQueryCreator = sentencesQueryCreator.sort({
+			[sortBy.key]: sortBy.order === 'ascend' ? 1 : -1,
+		});
+	}
+	let isFilterQuery = false;
+	if (filter && Object.keys(filter).length > 0) {
+		for (const [key, filters] of Object.entries(filter)) {
+			if (filters) {
+				sentencesQueryCreator = sentencesQueryCreator.in(
+					key,
+					filters.map(
+						(filterSentence) => new RegExp(filterSentence, 'gi')
+					)
+				);
+				isFilterQuery = true;
+			}
+		}
+	}
+
+	if (searchTerm) {
+		const regex = new RegExp(searchTerm, 'gi');
+		sentencesQueryCreator.find({
+			$or: [{ content: regex }, { translation: regex }],
+		});
+	}
+
+	const sentencesQuery = sentencesQueryCreator.toConstructor();
+	const total = await new sentencesQuery().countDocuments();
+	const sentences = await new sentencesQuery()
+		.limit(limit)
+		.skip(skip)
+		.exec();
+	return {
+		total,
+		sentences: sentences.map((entry) =>
+			entry.toJSON<IDictionarySentence>()
+		),
+	};
 };
 
 const getAllForWord = async ({
@@ -110,4 +166,12 @@ const update = async ({
 	);
 };
 
-export { get, getAllByLanguage, getAllForWord, create, update, remove };
+export {
+	get,
+	getAllByLanguage,
+	getAllForWord,
+	create,
+	update,
+	remove,
+	listSentences,
+};

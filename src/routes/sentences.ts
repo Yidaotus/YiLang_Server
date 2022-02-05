@@ -33,11 +33,30 @@ const fetchSchema = Joi.object({
 	skip: Joi.number().optional(),
 });
 
+const listSchema = Joi.object({
+	sortBy: Joi.object({
+		key: Joi.string().required(),
+		order: Joi.string().valid('ascend', 'descend'),
+	}).optional(),
+	filter: Joi.object()
+		.optional()
+		.pattern(
+			/^/,
+			Joi.array()
+				.items(Joi.string())
+				.allow(null)
+		),
+	skip: Joi.number().required(),
+	limit: Joi.number().required(),
+	lang: Joi.string().required(),
+	searchKey: Joi.string().optional(),
+});
+
 router.post(
-	'/',
+	'/list',
 	jwtGuard,
-	validate(sentenceSchema, 'body'),
-	privilegedRequest(SentenceController.add)
+	validate(listSchema, 'body'),
+	privilegedRequest(SentenceController.list)
 );
 
 router.post(
@@ -60,10 +79,19 @@ router.get(
 	privilegedRequest(SentenceController.getAllByLanguage)
 );
 
+router.get('/:id', jwtGuard, privilegedRequest(SentenceController.getSentence));
+
 router.get(
 	'/byWord/:wordId',
 	jwtGuard,
 	privilegedRequest(SentenceController.getAllForWord)
+);
+
+router.post(
+	'/',
+	jwtGuard,
+	validate(sentenceSchema, 'body'),
+	privilegedRequest(SentenceController.add)
 );
 
 export default router;

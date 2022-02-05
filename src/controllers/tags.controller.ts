@@ -6,11 +6,11 @@ import {
 	ISearchTagParams,
 } from '../helpers/api';
 import { IDictionaryTag } from '../Document/Dictionary';
-import { IPriviligedRequest } from '../routes';
+import { IPrivilegedRequest } from '../routes';
 import * as TagService from '../services/tags.service';
 
 const remove = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -37,7 +37,7 @@ const remove = async (
 };
 
 const get = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -64,7 +64,7 @@ const get = async (
 };
 
 const update = async (
-	req: IPriviligedRequest<IAddDictionaryTagParams>,
+	req: IPrivilegedRequest<IAddDictionaryTagParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -93,7 +93,7 @@ const update = async (
 };
 
 const add = async (
-	req: IPriviligedRequest<IAddDictionaryTagParams>,
+	req: IPrivilegedRequest<IAddDictionaryTagParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -121,7 +121,7 @@ const add = async (
 };
 
 const getAll = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -155,7 +155,7 @@ const getAll = async (
 };
 
 const search = async (
-	req: IPriviligedRequest<ISearchTagParams>,
+	req: IPrivilegedRequest<ISearchTagParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {

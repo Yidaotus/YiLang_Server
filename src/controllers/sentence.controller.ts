@@ -3,13 +3,89 @@ import {
 	IApiResponse,
 	ApiStatuses,
 	IAddDictionarySentenceParams,
+	IListSentencesParams,
+	IListSentencesResult,
 } from '../helpers/api';
 import { IDictionarySentence } from '../Document/Dictionary';
-import { IPriviligedRequest } from '../routes';
+import { IPrivilegedRequest } from '../routes';
 import * as SentenceService from '../services/sentence.service';
 
+const list = async (
+	req: IPrivilegedRequest<IListSentencesParams>,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const { filter, sortBy, skip, limit, searchTerm } = req.body;
+	const { langId } = req.params;
+	try {
+		const userId = req.user.id;
+		const listing = await SentenceService.listSentences({
+			sortBy,
+			skip,
+			limit,
+			lang: langId,
+			userId,
+			filter,
+			searchTerm,
+		});
+
+		let response: IApiResponse<IListSentencesResult>;
+		if (listing && listing.sentences.length > 0) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Sentences found!',
+				payload: listing,
+			};
+		} else {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'No Sentences found!',
+				payload: { total: 0, sentences: [] },
+			};
+		}
+
+		res.status(200).json(response);
+	} catch (err) {
+		next(err);
+	}
+};
+
+const getSentence = async (
+	req: IPrivilegedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	try {
+		const { id, langId } = req.params;
+		const getResult = await SentenceService.get({
+			userId,
+			langId,
+			id,
+		});
+		let response: IApiResponse<IDictionarySentence>;
+		if (getResult) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Entries found!',
+				payload: getResult,
+			};
+			res.status(200).json(response);
+		} else {
+			response = {
+				status: ApiStatuses.NOTFOUND,
+				message: 'No entries found!',
+				payload: null,
+			};
+			res.status(401).json(response);
+		}
+	} catch (err) {
+		next(err);
+	}
+};
+
 const remove = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -36,7 +112,7 @@ const remove = async (
 };
 
 const update = async (
-	req: IPriviligedRequest<IAddDictionarySentenceParams>,
+	req: IPrivilegedRequest<IAddDictionarySentenceParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -65,7 +141,7 @@ const update = async (
 };
 
 const add = async (
-	req: IPriviligedRequest<IAddDictionarySentenceParams>,
+	req: IPrivilegedRequest<IAddDictionarySentenceParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -93,7 +169,7 @@ const add = async (
 };
 
 const getAllForWord = async (
-	req: IPriviligedRequest<{ wordId: string }>,
+	req: IPrivilegedRequest<{ wordId: string }>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -129,7 +205,7 @@ const getAllForWord = async (
 };
 
 const getAllByLanguage = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -162,4 +238,12 @@ const getAllByLanguage = async (
 	}
 };
 
-export { getAllByLanguage, add, update, remove, getAllForWord };
+export {
+	getAllByLanguage,
+	add,
+	update,
+	remove,
+	getAllForWord,
+	getSentence,
+	list,
+};

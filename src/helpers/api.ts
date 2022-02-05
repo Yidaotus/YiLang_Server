@@ -283,13 +283,36 @@ export interface IListDocumentResult {
 	excerpts: Array<IDocumentExcerpt>;
 }
 
+export interface IListSentencesResult {
+	total: number;
+	sentences: Array<IDictionarySentence>;
+}
+
 export interface IListDictionaryResult {
 	total: number;
 	entries: Array<IDictionaryEntry>;
 }
+
+export interface IListSentencesParams {
+	sortBy?: {
+		key: keyof IDictionarySentence;
+		order: 'ascend' | 'descend';
+	};
+	filter?: {
+		[key in keyof Pick<
+			IDictionarySentence,
+			'content' | 'translation' | 'createdAt'
+		>]?: Array<string> | null;
+	};
+	skip: number;
+	limit: number;
+	lang: string;
+	searchTerm?: string;
+}
+
 export interface IListDictionaryParams {
 	sortBy?: {
-		key: string;
+		key: keyof IDictionaryEntry;
 		order: 'ascend' | 'descend';
 	};
 	filter?: {

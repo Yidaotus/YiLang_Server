@@ -9,10 +9,10 @@ import {
 } from '../helpers/api';
 import * as DictionaryService from '../services/dictionary.service';
 import { IDictionaryEntry } from '../Document/Dictionary';
-import { IPriviligedRequest } from '../routes';
+import { IPrivilegedRequest } from '../routes';
 
 const list = async (
-	req: IPriviligedRequest<IListDictionaryParams>,
+	req: IPrivilegedRequest<IListDictionaryParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -62,7 +62,7 @@ const list = async (
 };
 
 const searchEntries = async (
-	req: IPriviligedRequest<ISearchDictionaryParams>,
+	req: IPrivilegedRequest<ISearchDictionaryParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -98,7 +98,7 @@ const searchEntries = async (
 };
 
 const getEntry = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -131,7 +131,7 @@ const getEntry = async (
 	}
 };
 const updateEntry = async (
-	req: IPriviligedRequest<IDictionaryEntry>,
+	req: IPrivilegedRequest<IDictionaryEntry>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -158,7 +158,7 @@ const updateEntry = async (
 };
 
 const addEntry = async (
-	req: IPriviligedRequest<IDictionaryEntry>,
+	req: IPrivilegedRequest<IDictionaryEntry>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -184,7 +184,7 @@ const addEntry = async (
 };
 
 const deleteEntry = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -206,7 +206,7 @@ const deleteEntry = async (
 };
 
 const fetchEntries = async (
-	req: IPriviligedRequest<IDictionaryFetchParams>,
+	req: IPrivilegedRequest<IDictionaryFetchParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {

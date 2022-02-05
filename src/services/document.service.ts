@@ -71,11 +71,11 @@ const remove = async ({
 
 const DEFAULT_DOCUMENT = JSON.stringify([
 	{
-		type: 'title',
-		children: [{ text: `Your new document!` }],
-		align: 'center',
+		type: 'documentTitle',
+		children: [{ text: '' }],
+		align: 'left',
 	},
-	{ type: 'paragraph', align: 'left', children: [{ text: `Let's learn!` }] },
+	{ type: 'paragraph', align: 'left', children: [{ text: '' }] },
 ]);
 
 const create = async ({

@@ -18,7 +18,7 @@ export interface IApiRequest<T> extends express.Request {
 	body: T;
 }
 
-export interface IPriviligedRequest<T = void> extends IApiRequest<T> {
+export interface IPrivilegedRequest<T = void> extends IApiRequest<T> {
 	token: ITokenData;
 	user: IUser;
 }

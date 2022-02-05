@@ -6,11 +6,11 @@ import {
 	IListDocumentResult,
 	IListDocumentsParams,
 } from '../helpers/api';
-import { IPriviligedRequest } from '../routes';
+import { IPrivilegedRequest } from '../routes';
 import * as DocumentService from '../services/document.service';
 
 const createDocument = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -35,7 +35,7 @@ const createDocument = async (
 };
 
 const updateDocument = async (
-	req: IPriviligedRequest<Omit<IDocumentSerialized, 'id'>>,
+	req: IPrivilegedRequest<Omit<IDocumentSerialized, 'id'>>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -63,7 +63,7 @@ const updateDocument = async (
 };
 
 const listDocuments = async (
-	req: IPriviligedRequest<IListDocumentsParams>,
+	req: IPrivilegedRequest<IListDocumentsParams>,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -103,7 +103,7 @@ const listDocuments = async (
 };
 
 const getDocument = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
@@ -139,7 +139,7 @@ const getDocument = async (
 };
 
 const removeDocument = async (
-	req: IPriviligedRequest,
+	req: IPrivilegedRequest,
 	res: Response,
 	next: NextFunction
 ): Promise<void> => {
