@@ -1,10 +1,12 @@
 import { Response, NextFunction } from 'express';
 import { IDocumentSerialized } from '../Document/Document';
+import { isFragmentType } from '../Document/Fragment';
 import {
 	IApiResponse,
 	ApiStatuses,
 	IListDocumentResult,
 	IListDocumentsParams,
+	IFetchDocumentItemsResponse,
 } from '../helpers/api';
 import { IPrivilegedRequest } from '../routes';
 import * as DocumentService from '../services/document.service';
@@ -138,6 +140,42 @@ const getDocument = async (
 	}
 };
 
+const fetchDocumentItems = async (
+	req: IPrivilegedRequest,
+	res: Response,
+	next: NextFunction
+): Promise<void> => {
+	const userId = req.user.id;
+	const { id, langId } = req.params;
+
+	try {
+		const documentItems = await DocumentService.fetchItems({
+			id,
+			langId,
+			userId,
+		});
+
+		let response: IApiResponse<IFetchDocumentItemsResponse>;
+		if (documentItems) {
+			response = {
+				status: ApiStatuses.OK,
+				message: 'Document Items fetched!',
+				payload: documentItems,
+			};
+			res.status(200).json(response);
+		} else {
+			response = {
+				status: ApiStatuses.NOTFOUND,
+				message: 'No Document found!',
+				payload: null,
+			};
+			res.status(404).json(response);
+		}
+	} catch (err) {
+		next(err);
+	}
+};
+
 const removeDocument = async (
 	req: IPrivilegedRequest,
 	res: Response,
@@ -147,7 +185,7 @@ const removeDocument = async (
 	const userId = req.user.id;
 
 	try {
-		const document = await DocumentService.remove({
+		await DocumentService.remove({
 			id,
 			userId,
 			langId,
@@ -167,6 +205,7 @@ const removeDocument = async (
 
 export {
 	getDocument,
+	fetchDocumentItems,
 	listDocuments,
 	removeDocument,
 	createDocument,

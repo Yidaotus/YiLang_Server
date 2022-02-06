@@ -35,6 +35,13 @@ router.post(
 );
 
 router.get(
+	'/:id/items',
+	jwtGuard,
+	validate(idSchema, 'params'),
+	privilegedRequest(DocumentController.fetchDocumentItems)
+);
+
+router.get(
 	'/:id',
 	jwtGuard,
 	validate(idSchema, 'params'),

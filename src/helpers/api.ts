@@ -283,6 +283,11 @@ export interface IListDocumentResult {
 	excerpts: Array<IDocumentExcerpt>;
 }
 
+export interface IFetchDocumentItemsResponse {
+	sentenceItems: Array<IDictionarySentence>;
+	wordItems: Array<IDictionaryEntry>;
+}
+
 export interface IListSentencesResult {
 	total: number;
 	sentences: Array<IDictionarySentence>;

@@ -2,7 +2,10 @@ import { Schema } from 'mongoose';
 import { BlockType } from '../Document/Block';
 import { IDocumentSerialized } from '../Document/Document';
 import DocumentModel from '../entities/Document';
+import DictionarySentence from '../entities/Sentence';
+import DictionaryEntry from '../entities/Dictionary';
 import { IDocumentExcerpt, IListDocumentsParams } from '../helpers/api';
+import { IDictionaryEntry, IDictionarySentence } from '../Document/Dictionary';
 
 const listDocuments = async ({
 	sortBy,
@@ -110,4 +113,80 @@ const update = async ({
 	).exec();
 };
 
-export { listDocuments, get, update, remove, create };
+const searchForItemsInDocument = (
+	doc: object,
+	elementFilter: Array<string>
+) => {
+	if (!Array.isArray(doc)) {
+		throw new Error('Root element of document has to be an array!');
+	}
+	let foundItems = new Set<Record<string, unknown>>();
+	for (const docEntry of doc) {
+		if (elementFilter.includes(docEntry.type)) {
+			foundItems.add(docEntry);
+		}
+		if (docEntry.children && Array.isArray(docEntry.children)) {
+			const entriesInChildren = searchForItemsInDocument(
+				docEntry.children,
+				elementFilter
+			);
+			foundItems = new Set([...foundItems, ...entriesInChildren]);
+		}
+	}
+	return foundItems;
+};
+
+const fetchItems = async ({
+	userId,
+	id,
+	langId,
+}: {
+	userId: string;
+	id: string;
+	langId: string;
+}) => {
+	const document = await DocumentModel.findOne({
+		_id: id,
+		lang: langId,
+		userId,
+	})
+		.lean<IDocumentSerialized>()
+		.exec();
+	const deserializedDocument = JSON.parse(document.serializedDocument);
+
+	const items = searchForItemsInDocument(deserializedDocument, [
+		'sentence',
+		'word',
+	]);
+
+	const sentenceIds = [...items.values()]
+		.filter((item) => item.type === 'sentence')
+		.map((sentenceItem) => sentenceItem.sentenceId);
+
+	const wordIds = [...items.values()]
+		.filter((item) => item.type === 'word')
+		.map((wordItem) => wordItem.dictId);
+
+	const sentenceItems = await DictionarySentence.find({
+		lang: langId,
+		userId,
+	})
+		.in('_id', sentenceIds)
+		.exec();
+
+	const wordItems = await DictionaryEntry.find({
+		lang: langId,
+		userId,
+	})
+		.in('_id', wordIds)
+		.exec();
+
+	return {
+		sentenceItems: sentenceItems.map((entry) =>
+			entry.toJSON<IDictionarySentence>()
+		),
+		wordItems: wordItems.map((entry) => entry.toJSON<IDictionaryEntry>()),
+	};
+};
+
+export { listDocuments, get, update, remove, create, fetchItems };
