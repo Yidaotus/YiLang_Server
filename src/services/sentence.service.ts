@@ -17,10 +17,8 @@ const get = async ({
 		userId,
 		lang: langId,
 		_id: id,
-	})
-		.lean<IDictionarySentence>()
-		.exec();
-	return sentence;
+	}).exec();
+	return sentence.toJSON<IDictionarySentence>();
 };
 
 const listSentences = async ({
@@ -161,7 +159,7 @@ const update = async ({
 	newSentence: Omit<IDictionarySentence, 'id'>;
 }) => {
 	await DictionarySentence.updateOne(
-		{ id, lang: langId, userId },
+		{ _id: id, lang: langId, userId },
 		{ ...newSentence }
 	);
 };
