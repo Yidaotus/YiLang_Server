@@ -8,6 +8,7 @@
 	"author": "Daniel Voigt <D.Voigt1993@gmail.com>",
 	"license": "UNLICENSED",
 	"scripts": {
+		"start": "npm run start:prod",
 		"start:dev": "ts-node ./src/app.ts",
 		"start:prod": "node ./build/app.js",
 		"lint": "eslint --ext .js, src",
