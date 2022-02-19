@@ -13,7 +13,7 @@ mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
-var mongoDB = config.db.connectionString;
+var mongoDB = process.env.MONGODB_URI || config.db.connectionString;
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 var db = mongoose.connection;
 
