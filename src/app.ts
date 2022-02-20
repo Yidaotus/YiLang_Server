@@ -16,6 +16,7 @@ mongoose.set('useUnifiedTopology', true);
 var mongoDB = process.env.MONGODB_URI || config.db.connectionString;
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 var db = mongoose.connection;
+const PORT = process.env.PORT || 3000;
 
 //Bind connection to error event (to get notification of connection YiErrors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -61,7 +62,7 @@ db.once('open', async () => {
 	app.use('/api', apiRouter);
 	app.use(errorHandler);
 
-	app.listen(3000, () => {
+	app.listen(PORT, () => {
 		console.log('GOGO!');
 	});
 
