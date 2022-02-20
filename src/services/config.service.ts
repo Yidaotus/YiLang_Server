@@ -8,7 +8,7 @@ const addLanguage = async ({
 	userId: string;
 	languageConf: Omit<ILanguageConfig, 'id'>;
 }) => {
-	const config = await Config.findOne({
+	let config = await Config.findOne({
 		userId,
 	}).exec();
 	if (!config) {
@@ -20,6 +20,9 @@ const addLanguage = async ({
 				editorConfig: { autoSave: true, saveEveryNActions: 1000 },
 			},
 		});
+		config = await Config.findOne({
+			userId,
+		}).exec();
 	}
 	const newLanguageConfig = config.languageConfigs.create(languageConf);
 	config.languageConfigs.push(newLanguageConfig);
