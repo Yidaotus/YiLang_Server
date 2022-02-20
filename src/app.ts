@@ -28,6 +28,8 @@ db.once('open', async () => {
 				'http://localhost:3000',
 				'http://localhost:5000',
 				'http://localhost:3001',
+				'https://yilang-frontend.herokuapp.com/',
+				'https://yilang.yidaou.tech/',
 			],
 			credentials: true,
 			optionsSuccessStatus: 200,
