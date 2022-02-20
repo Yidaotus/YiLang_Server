@@ -11,6 +11,16 @@ const addLanguage = async ({
 	const config = await Config.findOne({
 		userId,
 	}).exec();
+	if (!config) {
+		await create({
+			userId,
+			config: {
+				languageConfigs: [],
+				activeLanguage: 'default',
+				editorConfig: { autoSave: true, saveEveryNActions: 1000 },
+			},
+		});
+	}
 	const newLanguageConfig = config.languageConfigs.create(languageConf);
 	config.languageConfigs.push(newLanguageConfig);
 	await config.validate();
